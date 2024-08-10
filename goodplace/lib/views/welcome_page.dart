@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:goodplace/view/sign_up.dart';
+import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/views/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -62,8 +63,7 @@ class WelcomePage extends StatelessWidget {
                 height: 57,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => SignUpPage()));
+                    Navigator.pushNamed(context, signInViewRoute);
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xffEBEAEC),

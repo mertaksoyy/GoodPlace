@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goodplace/constants/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignInView extends StatefulWidget {
@@ -159,7 +160,11 @@ class _MyWidgetState extends State<SignInView> {
                     style: GoogleFonts.rubik(
                         fontSize: 14, fontStyle: FontStyle.normal),
                   ),
-                  TextButton(onPressed: () {}, child: Text('SIGN UP')),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, signUpViewRoute);
+                      },
+                      child: Text('SIGN UP')),
                 ],
               ),
             ),

@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:goodplace/view/welcome_page.dart';
+import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/views/sign_in_view.dart';
+import 'package:goodplace/views/welcome_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -39,10 +41,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   top: 50,
                   child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const WelcomePage()));
+                        Navigator.pushNamed(context, signInViewRoute);
                       },
                       child: Image.asset('assets/images/sign_up_back.png')),
                 ),
