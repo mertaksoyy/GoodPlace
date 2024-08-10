@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:goodplace/view/sign_up.dart';
-import 'package:goodplace/view/welcome_page.dart';
+import 'package:goodplace/views/sign_up.dart';
+import 'package:goodplace/views/welcome_page.dart';
 
 void main() {
   runApp(const MyApp());
