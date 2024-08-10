@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/views/sign_in_view.dart';
+import 'package:goodplace/views/sign_up.dart';
 import 'package:goodplace/views/welcome_page.dart';
 
 void main() {
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const WelcomePage(),
         signInViewRoute: (context) => const SignInView(),
-        //signUpViewRoute: (context) => const SignUpView(),
+        signUpViewRoute: (context) => const SignUpPage(),
       },
     );
   }

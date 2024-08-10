@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goodplace/constants/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignInView extends StatefulWidget {
@@ -161,7 +162,7 @@ class _MyWidgetState extends State<SignInView> {
                   ),
                   TextButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/askledjeskf');
+                        Navigator.pushNamed(context, signUpViewRoute);
                       },
                       child: Text('SIGN UP')),
                 ],
