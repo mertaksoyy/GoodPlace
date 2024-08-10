@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:goodplace/view/sign_up.dart';
+import 'package:goodplace/views/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class WelcomePage extends StatelessWidget {

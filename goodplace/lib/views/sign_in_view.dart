@@ -159,7 +159,11 @@ class _MyWidgetState extends State<SignInView> {
                     style: GoogleFonts.rubik(
                         fontSize: 14, fontStyle: FontStyle.normal),
                   ),
-                  TextButton(onPressed: () {}, child: Text('SIGN UP')),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/askledjeskf');
+                      },
+                      child: Text('SIGN UP')),
                 ],
               ),
             ),
