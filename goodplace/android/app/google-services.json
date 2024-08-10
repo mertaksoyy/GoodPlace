@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "881426385912",
+    "project_id": "goodplace-firebase",
+    "storage_bucket": "goodplace-firebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881426385912:android:0387c52841151e2733240d",
+        "android_client_info": {
+          "package_name": "com.example.goodplace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBU5MLqRiDIayv4gzI_KC4wYvi27GRbO_U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

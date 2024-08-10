@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/views/sign_in_view.dart';
 import 'package:goodplace/view/welcome_page.dart';
 
 void main() {
@@ -11,10 +13,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-        ),
-        home: WelcomePage());
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      routes: {
+        '/': (context) => const SignInView(),
+        signInViewRoute: (context) => const SignInView(),
+        //signUpViewRoute: (context) => const SignUpView(),
+      },
+    );
   }
 }
