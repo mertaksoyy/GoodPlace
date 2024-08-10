@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goodplace/view/sign_up.dart';
 import 'package:goodplace/view/welcome_page.dart';
 
 void main() {
