@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/views/onboarding_view.dart';
 import 'package:goodplace/views/sign_in_view.dart';
 import 'package:goodplace/views/welcome_page.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -246,7 +247,7 @@ class _SignUpPageState extends State<SignUpPage> {
               height: 57,
               child: ElevatedButton(
                 onPressed: () {
-                  print("Get started");
+                  Navigator.pushNamed(context, onBoardViewRoute);
                 },
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xff8E97FD),
