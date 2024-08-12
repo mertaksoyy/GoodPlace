@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/firebase_options.dart';
+import 'package:goodplace/views/onboarding_view.dart';
+import 'package:goodplace/views/sign_in_view.dart';
 import 'package:goodplace/views/welcome_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -48,10 +50,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       top: 50,
                       child: GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const WelcomePage()));
+                            Navigator.pushNamed(context, signInViewRoute);
                           },
                           child: Image.asset('assets/images/sign_up_back.png')),
                     ),
@@ -270,8 +269,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       } on FirebaseAuthException catch (e) {
                         print(e.code);
                       }
+<<<<<<< HEAD
                       Navigator.of(context)
                           .pushReplacementNamed(onBoardViewRoute);
+=======
+                      Navigator.pushNamed(context, onBoardViewRoute);
+>>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff8E97FD),
@@ -298,6 +301,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               fontWeight: FontWeight.w500,
                               color: Color(0xffA1A4B2))),
                       GestureDetector(
+<<<<<<< HEAD
                         onTap: () {
                           print("Go to Sing in Page");
                           Navigator.of(context).pushNamed(signInViewRoute);
@@ -308,6 +312,17 @@ class _SignUpPageState extends State<SignUpPage> {
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Color(0xff8E97FD)),
+=======
+                          onTap: () {
+                            Navigator.of(context).pushNamed(signInViewRoute);
+                          },
+                          child: Text(
+                            " SIGN IN",
+                            style: GoogleFonts.rubik(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff8E97FD)),
+>>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
                         ),
                       ),
                     ],
