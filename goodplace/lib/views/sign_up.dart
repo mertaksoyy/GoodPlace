@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/firebase_options.dart';
 import 'package:goodplace/views/onboarding_view.dart';
 import 'package:goodplace/views/sign_in_view.dart';
 import 'package:goodplace/views/welcome_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -15,7 +18,8 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   var tfUserNameController = TextEditingController();
-  var tfMailontroller = TextEditingController();
+  String userName = "";
+  var tfMailController = TextEditingController();
   var tfPassController = TextEditingController();
   bool isNameValid = true;
   bool isGmailValid = true;
@@ -25,9 +29,13 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Container(
+      resizeToAvoidBottomInset: false,
+      body: FutureBuilder(
+        future: Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        ),
+        builder: (context, snapshot) {
+          return Container(
             width: double.infinity,
             child: Column(
               children: [
@@ -150,9 +158,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: TextFormField(
-                    controller: tfMailontroller,
+                    controller: tfMailController,
                     textInputAction: TextInputAction.next,
-                    inputFormatters: [LengthLimitingTextInputFormatter(20)],
                     decoration: InputDecoration(
                         filled: true,
                         fillColor: Color(0xffF2F3F7),
@@ -175,7 +182,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     obscureText: _obscureText,
                     controller: tfPassController,
                     textInputAction: TextInputAction.next,
-                    inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                    //inputFormatters: [LengthLimitingTextInputFormatter(20)],
                     decoration: InputDecoration(
                         filled: true,
                         fillColor: Color(0xffF2F3F7),
@@ -249,7 +256,19 @@ class _SignUpPageState extends State<SignUpPage> {
                   width: 360,
                   height: 57,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      userName = tfUserNameController.text;
+                      final email = tfMailController.text;
+                      final password = tfMailController.text;
+                      try {
+                        final userCredentials = await FirebaseAuth.instance
+                            .createUserWithEmailAndPassword(
+                          email: email,
+                          password: password,
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        print(e.code);
+                      }
                       Navigator.pushNamed(context, onBoardViewRoute);
                     },
                     style: ElevatedButton.styleFrom(
@@ -278,7 +297,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               color: Color(0xffA1A4B2))),
                       GestureDetector(
                           onTap: () {
-                            print("Go to Sing in Page");
+                            Navigator.of(context).pushNamed(signInViewRoute);
                           },
                           child: Text(
                             " SIGN IN",
@@ -286,14 +305,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xff8E97FD)),
-                          ))
+                        ),
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
