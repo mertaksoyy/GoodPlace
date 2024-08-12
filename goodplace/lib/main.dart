@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const WelcomePage(),
         signInViewRoute: (context) => const SignInView(),
         signUpViewRoute: (context) => const SignUpPage(),
-        onBoardViewRoute: (context) => OnBoardPage(),
+        onBoardViewRoute: (context) => const OnBoardPage(),
       },
     );
   }
