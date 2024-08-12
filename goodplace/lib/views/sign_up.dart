@@ -271,7 +271,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         print(e.code);
                       }
                       Navigator.of(context)
-                          .pushReplacementNamed(signInViewRoute);
+                          .pushReplacementNamed(onBoardViewRoute);
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff8E97FD),
@@ -298,20 +298,21 @@ class _SignUpPageState extends State<SignUpPage> {
                               fontWeight: FontWeight.w500,
                               color: Color(0xffA1A4B2))),
                       GestureDetector(
-                          onTap: () {
-                            print("Go to Sing in Page");
-                            Navigator.of(context).pushNamed(signInViewRoute);
-                          },
-                          child: Text(
-                            " SIGN IN",
-                            style: GoogleFonts.rubik(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff8E97FD)),
-                          ))
+                        onTap: () {
+                          print("Go to Sing in Page");
+                          Navigator.of(context).pushNamed(signInViewRoute);
+                        },
+                        child: Text(
+                          " SIGN IN",
+                          style: GoogleFonts.rubik(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff8E97FD)),
+                        ),
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           );
