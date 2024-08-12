@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/views/onboarding_view.dart';
 import 'package:goodplace/views/sign_in_view.dart';
 import 'package:goodplace/views/sign_up.dart';
 import 'package:goodplace/views/welcome_page.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const WelcomePage(),
         signInViewRoute: (context) => const SignInView(),
         signUpViewRoute: (context) => const SignUpPage(),
+        onBoardViewRoute: (context) => const OnBoardPage(),
       },
     );
   }

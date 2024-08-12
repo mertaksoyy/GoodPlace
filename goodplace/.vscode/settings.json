@@ -15,5 +15,6 @@
         "**/Thumbs.db": true,
         "**/.rmv/catalog/**": true,
         "*/_*": false
-    }
+    },
+    "cmake.sourceDirectory": "/Users/mertaksoy/GitHubDesktop/GoodPlace/goodplace/linux"
 }
