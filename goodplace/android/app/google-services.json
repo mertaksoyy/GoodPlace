@@ -12,7 +12,20 @@
           "package_name": "com.example.goodplace"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "881426385912-3030f5v0500mivi676uk57i8a9r36m1r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.goodplace",
+            "certificate_hash": "96a04100a299ddb9c99ed22b6f9aadb68f41ad06"
+          }
+        },
+        {
+          "client_id": "881426385912-apkc74des2bunb734ht6btq95ch20m2h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBU5MLqRiDIayv4gzI_KC4wYvi27GRbO_U"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "881426385912-apkc74des2bunb734ht6btq95ch20m2h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "881426385912-mhoomd2m5jmp4up64121jdi0g9vaprgb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.goodplace"
+              }
+            }
+          ]
         }
       }
     }
