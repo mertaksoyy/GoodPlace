@@ -21,6 +21,20 @@ class SignInView extends StatefulWidget {
 class _SignInViewState extends State<SignInView> {
   var tfMailontroller = TextEditingController();
   var tfPassController = TextEditingController();
+<<<<<<< HEAD
+
+  late final TextEditingController emailController;
+  late final TextEditingController passwordController;
+
+  @override
+  void initState() {
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    super.initState();
+  }
+
+=======
+>>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
   @override
   void dispose() {
     emailController.clear();
@@ -34,76 +48,206 @@ class _SignInViewState extends State<SignInView> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: CircleAvatar(
-          backgroundColor: Colors.white,
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(welcomePageRoute);
-            },
-            icon: Icon(Icons.arrow_back),
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: FutureBuilder(
-          future: Firebase.initializeApp(
-            options: DefaultFirebaseOptions.currentPlatform,
-          ),
-          builder: (context, snapshot) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: welcomeHeight),
-                  child: Text(
-                    style: GoogleFonts.rubik(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    screenMessage,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20, googleButtonHeight, 20, 0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(35.76),
-                      ),
-                    ),
-                    onPressed: () async {
-                      try {
-                        final GoogleSignInAccount? userWithGoogle =
-                            await GoogleSignIn().signIn();
-                        final GoogleSignInAuthentication userAuth =
-                            await userWithGoogle!.authentication;
-                        final credentials = GoogleAuthProvider.credential(
-                          accessToken: userAuth.accessToken,
-                          idToken: userAuth.idToken,
-                        );
-                        final UserCredential userCredential = await FirebaseAuth
-                            .instance
-                            .signInWithCredential(credentials);
-                        print(userCredential.user?.email);
-                      } on FirebaseAuthException catch (e) {
-                        print(e.code);
-                      }
-
-                      Navigator.of(context).pushNamed(mainPageRoute);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(
-                        child: Text(
-                          gButtonMessage,
-                          style: GoogleFonts.rubik(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: FutureBuilder(
+            future: Firebase.initializeApp(
+              options: DefaultFirebaseOptions.currentPlatform,
+            ),
+            builder: (context, snapshot) {
+              return Container(
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Image.asset('assets/images/signup.png'),
+                        ),
+                        Positioned(
+                          left: 17,
+                          top: 50,
+                          child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, welcomePageRoute);
+                              },
+                              child: Image.asset(
+                                  'assets/images/sign_up_back.png')),
+                        ),
+                        Positioned(
+                          top:
+                              120.0, // signup.png'nin içinde konumlandırmak için
+                          left:
+                              95.0, // signup.png'nin içinde konumlandırmak için
+                          child: Text(
+                            "Welcome Back!",
+                            style: GoogleFonts.rubik(
+                                fontSize: 28, fontWeight: FontWeight.bold),
                           ),
                         ),
+<<<<<<< HEAD
+                        Positioned(
+                            top: 155,
+                            left: 0,
+                            child: Image.asset(
+                              'assets/images/signupdesign.png',
+                              color: // Color(0xffFAF8F5)
+                                  const Color.fromARGB(255, 240, 239, 237),
+                            )),
+                        Positioned(
+                          top: 260,
+                          left:
+                              45, // Butonu biraz daha ortalamak için left değerini değiştirdim
+                          child: Center(
+                            child: SizedBox(
+                              width: 300, // Genişliği artırdım
+                              height: 60, // Yüksekliği artırdım
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  try {
+                                    final GoogleSignInAccount? userWithGoogle =
+                                        await GoogleSignIn().signIn();
+                                    final GoogleSignInAuthentication userAuth =
+                                        await userWithGoogle!.authentication;
+                                    final credentials =
+                                        GoogleAuthProvider.credential(
+                                      accessToken: userAuth.accessToken,
+                                      idToken: userAuth.idToken,
+                                    );
+                                    final UserCredential userCredential =
+                                        await FirebaseAuth.instance
+                                            .signInWithCredential(credentials);
+                                    print(userCredential.user?.email);
+                                  } on FirebaseAuthException catch (e) {
+                                    print(e.code);
+                                  }
+                                  Navigator.of(context)
+                                      .pushNamed(onBoardViewRoute);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/images/googlesignin.png",
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    const SizedBox(
+                                        width:
+                                            15), // İkon ve metin arasındaki boşluk
+                                    Text(
+                                      "CONTINUE WITH GOOGLE",
+                                      style: GoogleFonts.rubik(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff3F414E), // Metin rengi
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Text(
+                      "OR LOG IN WITH EMAIL",
+                      style: GoogleFonts.rubik(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xffA1A4B2)),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: TextFormField(
+                        controller: tfMailontroller,
+                        textInputAction: TextInputAction.next,
+                        //inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xffF2F3F7),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          labelText: "Email address",
+                          labelStyle: GoogleFonts.rubik(
+                              fontSize: 16, fontWeight: FontWeight.w300),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: TextFormField(
+                        controller: tfPassController,
+                        textInputAction: TextInputAction.next,
+                        //inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xffF2F3F7),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          labelText: "Password",
+                          labelStyle: GoogleFonts.rubik(
+                              fontSize: 16, fontWeight: FontWeight.w300),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      width: 360,
+                      height: 57,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final email = emailController.text;
+                          final password = passwordController.text;
+                          try {
+                            final userCredentials = await FirebaseAuth.instance
+                                .signInWithEmailAndPassword(
+                              email: email,
+                              password: password,
+                            );
+                          } on FirebaseAuthException catch (e) {
+                            print(e.code);
+                          }
+
+                          Navigator.of(context).pushNamed(mainPageRoute);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff8E97FD),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 40, vertical: 20),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40))),
+                        child: Text(
+                          "LOG IN",
+                          style: GoogleFonts.rubik(
+                              fontSize: 13.18,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xffF6F1FB)),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(50, 20, 50, 0),
+                      child: Text(
+                        'Forgot Password?',
+=======
                 Padding(
                   padding: EdgeInsets.only(top: loginTextHeight),
                   child: Text(
@@ -188,17 +332,52 @@ class _SignInViewState extends State<SignInView> {
                     children: [
                       Text(
                         lastMessage1,
+>>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
                         style: GoogleFonts.rubik(
-                            fontSize: 14, fontStyle: FontStyle.normal),
+                          fontSize: 14,
+                          fontStyle: FontStyle.normal,
+                        ),
                       ),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(signUpViewRoute);
-                          },
-                          child: Text('SIGN UP')),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(60, 20, 50, 0),
+                      child: Row(
+                        children: [
+                          Text("DON’T HAVE AN ACCOUNT?",
+                              style: GoogleFonts.rubik(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xffA1A4B2))),
+                          GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, signUpViewRoute);
+                              },
+                              child: Text(
+                                " SIGN UP",
+                                style: GoogleFonts.rubik(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff8E97FD)),
+                              ))
+                        ],
+                      ),
+                    )
+                  ],
                 ),
+<<<<<<< HEAD
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+=======
               ],
             );
           },
+>>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
