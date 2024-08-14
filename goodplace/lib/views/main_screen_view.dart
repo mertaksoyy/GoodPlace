@@ -34,9 +34,8 @@ class _MainScreenViewState extends State<MainScreenView> {
 
   @override
   Widget build(BuildContext context) {
-      backgroundColor: const Color(0xff8E97FD),
+    return Scaffold(
       appBar: AppBar(
-        leading: Icon(Icons.dehaze),
         backgroundColor: Color(0xff8E97FD),
         title: Text(
           "Habits",
@@ -45,6 +44,38 @@ class _MainScreenViewState extends State<MainScreenView> {
               fontStyle: FontStyle.italic,
               fontSize: 25),
         ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Drawer Header'),
+            ),
+            ListTile(
+              title: const Text('Item 1'),
+              onTap: () {
+                // Update the state of the app.
+                // ...
+              },
+            ),
+            ListTile(
+              title: const Text('Logout'),
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushReplacementNamed(welcomePageRoute);
+              },
+            ),
+          ],
+        ),
+      ),
+      body: const Center(
+        child: Text('User is logged in with email and password.'),
+      ),
         centerTitle: true,
       ),
       body: Column(
