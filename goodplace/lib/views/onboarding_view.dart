@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/onboarding/onboarding_items.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnBoardPage extends StatefulWidget {
   const OnBoardPage({super.key});
@@ -14,12 +15,14 @@ class _OnBoardPageState extends State<OnBoardPage> {
   final controller = OnboardingItems();
   final pageController = PageController();
 
-  void _onNextButtonPressed() {
+  void _onNextButtonPressed() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (pageController.page == controller.items.length - 1) {
-      // Kullanıcı son sayfadaysa, Sign In sayfasına yönlendir
+      prefs.setBool('res', false);
       Navigator.pushNamed(context, mainPageRoute);
     } else {
       // Kullanıcı diğer sayfalardaysa, bir sonraki sayfaya geç
+      prefs.setBool('res', true);
       pageController.nextPage(
         duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,

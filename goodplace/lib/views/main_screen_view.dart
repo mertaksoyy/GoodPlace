@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:goodplace/constants/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
@@ -32,7 +34,6 @@ class _MainScreenViewState extends State<MainScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
       backgroundColor: const Color(0xff8E97FD),
       appBar: AppBar(
         leading: Icon(Icons.dehaze),
