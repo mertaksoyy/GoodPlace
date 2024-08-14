@@ -259,7 +259,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     onPressed: () async {
                       userName = tfUserNameController.text;
                       final email = tfMailController.text;
-                      final password = tfMailController.text;
+                      final password = tfPassController.text;
                       try {
                         final userCredentials = await FirebaseAuth.instance
                             .createUserWithEmailAndPassword(
@@ -269,12 +269,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       } on FirebaseAuthException catch (e) {
                         print(e.code);
                       }
-<<<<<<< HEAD
                       Navigator.of(context)
                           .pushReplacementNamed(onBoardViewRoute);
-=======
-                      Navigator.pushNamed(context, onBoardViewRoute);
->>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff8E97FD),
@@ -301,7 +297,6 @@ class _SignUpPageState extends State<SignUpPage> {
                               fontWeight: FontWeight.w500,
                               color: Color(0xffA1A4B2))),
                       GestureDetector(
-<<<<<<< HEAD
                         onTap: () {
                           print("Go to Sing in Page");
                           Navigator.of(context).pushNamed(signInViewRoute);
@@ -312,17 +307,6 @@ class _SignUpPageState extends State<SignUpPage> {
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Color(0xff8E97FD)),
-=======
-                          onTap: () {
-                            Navigator.of(context).pushNamed(signInViewRoute);
-                          },
-                          child: Text(
-                            " SIGN IN",
-                            style: GoogleFonts.rubik(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff8E97FD)),
->>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
                         ),
                       ),
                     ],
