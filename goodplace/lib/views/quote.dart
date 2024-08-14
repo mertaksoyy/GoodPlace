@@ -1,7 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MainScreenView extends StatefulWidget {
@@ -13,20 +14,12 @@ class _MainScreenViewState extends State<MainScreenView> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  String quote =
-      "There is an inspirational quote waiting for you just a click away!";
 
-  Future<void> fetchRandomQuote() async {
-    final response =
-        await http.get(Uri.parse("https://api.quotable.io/random"));
-
+  Future api() async {
+    final response = await http.get(Uri.parse('https://api.quotable.io'));
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        quote = data['content'];
-      });
-    } else {
-      throw Exception('Failed to load quote');
+      var data = jsonDecode(response.body);
+      return data;
     }
   }
 
@@ -48,6 +41,38 @@ class _MainScreenViewState extends State<MainScreenView> {
       ),
       body: Column(
         children: [
+          FutureBuilder(
+              future: api(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  Text("No data");
+                }
+                return Padding(
+                  padding: const EdgeInsets.all(13.0),
+                  child: Container(
+                    padding: EdgeInsets.all(
+                        16), // İçerik ile sınırlar arasındaki boşluk
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Arka plan rengi
+                      borderRadius:
+                          BorderRadius.circular(12), // Köşe yuvarlaklığı
+                    ),
+                    child: Text(
+                      snapshot.data['quote'],
+                      style: GoogleFonts.rubik(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xff4D57C8)), // Yazı rengi
+                      textAlign: TextAlign.center, // Yazıyı ortalar
+                    ),
+                  ),
+                );
+              }),
           Container(
             margin: EdgeInsets.fromLTRB(16.0, 2.0, 16.0, 0),
             decoration: BoxDecoration(
@@ -124,28 +149,6 @@ class _MainScreenViewState extends State<MainScreenView> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(13.0),
-            child: GestureDetector(
-              onTap: fetchRandomQuote,
-              child: Container(
-                padding:
-                    EdgeInsets.all(16), // İçerik ile sınırlar arasındaki boşluk
-                decoration: BoxDecoration(
-                  color: Colors.white, // Arka plan rengi
-                  borderRadius: BorderRadius.circular(12), // Köşe yuvarlaklığı
-                ),
-                child: Text(
-                  quote,
-                  style: GoogleFonts.rubik(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff4D57C8)), // Yazı rengi
-                  textAlign: TextAlign.center, // Yazıyı ortalar
-                ),
-              ),
-            ),
-          )
         ],
       ),
     );

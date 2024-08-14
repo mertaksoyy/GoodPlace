@@ -17,11 +17,7 @@ class _OnBoardPageState extends State<OnBoardPage> {
   void _onNextButtonPressed() {
     if (pageController.page == controller.items.length - 1) {
       // Kullanıcı son sayfadaysa, Sign In sayfasına yönlendir
-<<<<<<< HEAD
       Navigator.pushNamed(context, mainPageRoute);
-=======
-      Navigator.pushNamed(context, signInViewRoute);
->>>>>>> 67c1c3c364c0b757cee6567a29badb562c6d1ac7
     } else {
       // Kullanıcı diğer sayfalardaysa, bir sonraki sayfaya geç
       pageController.nextPage(
