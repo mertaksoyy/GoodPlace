@@ -15,7 +15,6 @@ class SignInView extends StatefulWidget {
 class _SignInViewState extends State<SignInView> {
   late final tfMailController;
   late final tfPassController;
-
   bool showOnboarding = true;
 
   @override
@@ -31,7 +30,7 @@ class _SignInViewState extends State<SignInView> {
     showOnboarding = prefs.getBool('res') ?? true;
     print(showOnboarding);
   }
-
+  
   @override
   void dispose() {
     tfMailController.clear();
@@ -53,18 +52,134 @@ class _SignInViewState extends State<SignInView> {
               children: [
                 Stack(
                   children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Image.asset('assets/images/signup.png'),
+                    Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Image.asset('assets/images/signup.png'),
+                        ),
+                        Positioned(
+                          left: 17,
+                          top: 50,
+                          child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, welcomePageRoute);
+                              },
+                              child: Image.asset(
+                                  'assets/images/sign_up_back.png')),
+                        ),
+                        Positioned(
+                          top:
+                              120.0, // signup.png'nin içinde konumlandırmak için
+                          left:
+                              95.0, // signup.png'nin içinde konumlandırmak için
+                          child: Text(
+                            "Welcome Back!",
+                            style: GoogleFonts.rubik(
+                                fontSize: 28, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Positioned(
+                            top: 155,
+                            left: 0,
+                            child: Image.asset(
+                              'assets/images/signupdesign.png',
+                              color: // Color(0xffFAF8F5)
+                                  const Color.fromARGB(255, 240, 239, 237),
+                            )),
+                        Positioned(
+                          top: 260,
+                          left:
+                              45, // Butonu biraz daha ortalamak için left değerini değiştirdim
+                          child: Center(
+                            child: SizedBox(
+                              width: 300, // Genişliği artırdım
+                              height: 60, // Yüksekliği artırdım
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  try {
+                                    final GoogleSignInAccount? userWithGoogle =
+                                        await GoogleSignIn().signIn();
+                                    final GoogleSignInAuthentication userAuth =
+                                        await userWithGoogle!.authentication;
+                                    final credentials =
+                                        GoogleAuthProvider.credential(
+                                      accessToken: userAuth.accessToken,
+                                      idToken: userAuth.idToken,
+                                    );
+                                    final UserCredential userCredential =
+                                        await FirebaseAuth.instance
+                                            .signInWithCredential(credentials);
+                                    print(userCredential.user?.email);
+                                  } on FirebaseAuthException catch (e) {
+                                    print(e.code);
+                                  }
+                                  Navigator.of(context)
+                                      .pushNamed(onBoardViewRoute);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/images/googlesignin.png",
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    const SizedBox(
+                                        width:
+                                            15), // İkon ve metin arasındaki boşluk
+                                    Text(
+                                      "CONTINUE WITH GOOGLE",
+                                      style: GoogleFonts.rubik(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff3F414E), // Metin rengi
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Positioned(
-                      left: 17,
-                      top: 50,
-                      child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, welcomePageRoute);
-                          },
-                          child: Image.asset('assets/images/sign_up_back.png')),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Text(
+                      "OR LOG IN WITH EMAIL",
+                      style: GoogleFonts.rubik(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xffA1A4B2)),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: TextFormField(
+                        controller: tfMailController,
+                        textInputAction: TextInputAction.next,
+                        //inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xffF2F3F7),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          labelText: "Email address",
+                          labelStyle: GoogleFonts.rubik(
+                              fontSize: 16, fontWeight: FontWeight.w300),
+                        ),
+                      ),
                     ),
                     Positioned(
                       top: 120.0, // signup.png'nin içinde konumlandırmak için

@@ -18,8 +18,6 @@ class _OnBoardPageState extends State<OnBoardPage> {
   void _onNextButtonPressed() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (pageController.page == controller.items.length - 1) {
-      // Kullanıcı tüm sayfaları geçerse, Sign In sayfasına yönlendir.
-      //Aksi halde tüm sayfaları tekrar göster.
       prefs.setBool('res', false);
       Navigator.pushNamed(context, mainPageRoute);
     } else {

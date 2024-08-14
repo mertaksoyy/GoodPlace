@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         signInViewRoute: (context) => const SignInView(),
         signUpViewRoute: (context) => const SignUpPage(),
         welcomePageRoute: (context) => const WelcomePage(),
-        mainPageRoute: (context) => const MainScreenView(),
+        mainPageRoute: (context) => MainScreenView(),
         onBoardViewRoute: (context) => const OnBoardPage(),
       },
     );
