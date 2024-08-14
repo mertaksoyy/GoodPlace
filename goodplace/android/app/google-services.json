@@ -14,15 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "881426385912-3030f5v0500mivi676uk57i8a9r36m1r.apps.googleusercontent.com",
+          "client_id": "881426385912-qaasg5j8k7d3gl4o1c7eceblduht5lvi.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.goodplace",
-            "certificate_hash": "96a04100a299ddb9c99ed22b6f9aadb68f41ad06"
+            "certificate_hash": "6e8348160ce8bff96f57583aa190f57f9f255665"
           }
         },
         {
-          "client_id": "881426385912-apkc74des2bunb734ht6btq95ch20m2h.apps.googleusercontent.com",
+          "client_id": "881426385912-0u1g4ckekcaiucl2e9a5rmnqatna5abj.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "881426385912-apkc74des2bunb734ht6btq95ch20m2h.apps.googleusercontent.com",
+              "client_id": "881426385912-0u1g4ckekcaiucl2e9a5rmnqatna5abj.apps.googleusercontent.com",
               "client_type": 3
             },
             {
