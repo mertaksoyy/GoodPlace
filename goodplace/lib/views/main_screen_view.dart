@@ -44,6 +44,7 @@ class _MainScreenViewState extends State<MainScreenView> {
               fontStyle: FontStyle.italic,
               fontSize: 25),
         ),
+        centerTitle: true,
       ),
       drawer: Drawer(
         child: ListView(
@@ -72,11 +73,6 @@ class _MainScreenViewState extends State<MainScreenView> {
             ),
           ],
         ),
-      ),
-      body: const Center(
-        child: Text('User is logged in with email and password.'),
-      ),
-        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -175,6 +171,83 @@ class _MainScreenViewState extends State<MainScreenView> {
                       color: Color(0xff4D57C8)), // Yazı rengi
                   textAlign: TextAlign.center, // Yazıyı ortalar
                 ),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, habitPageViewRoute);
+            },
+            child: Container(
+              height: 220,
+              child: Stack(
+                children: [
+                  Positioned(
+                      top: 25,
+                      left: 20,
+                      child: Material(
+                        child: Container(
+                          height: 180.0,
+                          width: 350,
+                          decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 103, 108, 167),
+                              borderRadius: BorderRadius.circular(5.0)),
+                        ),
+                      )),
+                  Positioned(
+                    top: 10,
+                    left: 30,
+                    child: Card(
+                      elevation: 10.0,
+                      shadowColor:
+                          Color.fromARGB(255, 240, 238, 156).withOpacity(0.5),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0)),
+                      child: Container(
+                        height: 150,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          color: Color(0xff8E97FD),
+                          borderRadius: BorderRadius.circular(10.0),
+                          image: DecorationImage(
+                              fit: BoxFit.fill,
+                              image:
+                                  AssetImage('assets/images/onboardbttn.png')),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 45,
+                    left: 190,
+                    child: Container(
+                      width: 150,
+                      height: 180,
+                      child: Column(
+                        children: [
+                          Text(
+                            "Click and create your new habits!",
+                            style: GoogleFonts.rubik(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xffFFECCC)),
+                          ),
+                          Divider(
+                            color: Colors.black,
+                          ),
+                          Text(
+                            "Or track your habits!",
+                            style: GoogleFonts.rubik(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.italic,
+                                color: Color(0xffFFECCC)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
           )
