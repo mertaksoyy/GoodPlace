@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/utils/show_error_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,7 +31,7 @@ class _SignInViewState extends State<SignInView> {
     showOnboarding = prefs.getBool('res') ?? true;
     print(showOnboarding);
   }
-  
+
   @override
   void dispose() {
     tfMailController.clear();
@@ -153,33 +154,6 @@ class _SignInViewState extends State<SignInView> {
                     ),
                     SizedBox(
                       height: 15,
-                    ),
-                    Text(
-                      "OR LOG IN WITH EMAIL",
-                      style: GoogleFonts.rubik(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xffA1A4B2)),
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: TextFormField(
-                        controller: tfMailController,
-                        textInputAction: TextInputAction.next,
-                        //inputFormatters: [LengthLimitingTextInputFormatter(20)],
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Color(0xffF2F3F7),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          labelText: "Email address",
-                          labelStyle: GoogleFonts.rubik(
-                              fontSize: 16, fontWeight: FontWeight.w300),
-                        ),
-                      ),
                     ),
                     Positioned(
                       top: 120.0, // signup.png'nin içinde konumlandırmak için
@@ -313,9 +287,22 @@ class _SignInViewState extends State<SignInView> {
                           email: email,
                           password: password,
                         );
-                        Navigator.of(context).pushNamed(mainPageRoute);
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            mainPageRoute, (route) => false);
                       } on FirebaseAuthException catch (e) {
-                        print(e.code);
+                        if (e.code == 'invalid-email') {
+                          await showErrorDialog(context, 'Invalid Email');
+                        } else if (e.code == 'invalid-credential') {
+                          await showErrorDialog(context, 'Invalid Credential');
+                        } else {
+                          await showErrorDialog(
+                              context, 'Email and password must be entered!');
+                        }
+                      } catch (e) {
+                        await showErrorDialog(
+                          context,
+                          e.toString(),
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(

@@ -19,7 +19,8 @@ class _OnBoardPageState extends State<OnBoardPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (pageController.page == controller.items.length - 1) {
       prefs.setBool('res', false);
-      Navigator.pushNamed(context, mainPageRoute);
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(mainPageRoute, (route) => false);
     } else {
       // Kullanıcı diğer sayfalardaysa, bir sonraki sayfaya geç
       prefs.setBool('res', true);
