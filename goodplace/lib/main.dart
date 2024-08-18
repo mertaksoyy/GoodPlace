@@ -74,15 +74,16 @@ class _HomeScreenState extends State<HomeScreen> {
             final user = FirebaseAuth.instance.currentUser;
 
             if (user != null) {
-              if (showOnboarding)
-                return OnBoardPage();
-              else
+              if (showOnboarding) {
+                return const OnBoardPage();
+              } else {
                 return MainScreenView();
+              }
             } else {
-              return WelcomePage();
+              return const WelcomePage();
             }
           default:
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
         }
       },
     );

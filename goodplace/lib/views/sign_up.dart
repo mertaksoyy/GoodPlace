@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/utils/show_error_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -257,12 +258,25 @@ class _SignUpPageState extends State<SignUpPage> {
                       email: email,
                       password: password,
                     );
-                    Navigator.pushReplacementNamed(
-                      context,
+                    Navigator.of(context).pushNamed(
                       onBoardViewRoute,
                     );
                   } on FirebaseAuthException catch (e) {
-                    print(e.code);
+                    if (e.code == 'weak-password') {
+                      await showErrorDialog(context, 'Weak Password');
+                    } else if (e.code == 'email-already-in-use') {
+                      await showErrorDialog(context, 'Email is already in use');
+                    } else if (e.code == 'invalid-email') {
+                      await showErrorDialog(context, 'Invalid Email');
+                    } else {
+                      await showErrorDialog(
+                          context, 'Email and password must be entered!');
+                    }
+                  } catch (e) {
+                    await showErrorDialog(
+                      context,
+                      e.toString(),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
