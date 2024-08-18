@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/firebase_options.dart';
+import 'package:goodplace/views/habit_page_view.dart';
 import 'package:goodplace/views/main_screen_view.dart';
 import 'package:goodplace/views/onboarding_view.dart';
 import 'package:goodplace/views/sign_in_view.dart';
@@ -10,15 +11,15 @@ import 'package:goodplace/views/sign_up.dart';
 import 'package:goodplace/views/welcome_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         welcomePageRoute: (context) => const WelcomePage(),
         mainPageRoute: (context) => MainScreenView(),
         onBoardViewRoute: (context) => const OnBoardPage(),
+        habitPageViewRoute: (context) => HabitPageView(),
       },
     );
   }
