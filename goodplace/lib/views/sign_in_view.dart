@@ -30,7 +30,7 @@ class _SignInViewState extends State<SignInView> {
     showOnboarding = prefs.getBool('res') ?? true;
     print(showOnboarding);
   }
-  
+
   @override
   void dispose() {
     tfMailController.clear();
@@ -153,33 +153,6 @@ class _SignInViewState extends State<SignInView> {
                     ),
                     SizedBox(
                       height: 15,
-                    ),
-                    Text(
-                      "OR LOG IN WITH EMAIL",
-                      style: GoogleFonts.rubik(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xffA1A4B2)),
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: TextFormField(
-                        controller: tfMailController,
-                        textInputAction: TextInputAction.next,
-                        //inputFormatters: [LengthLimitingTextInputFormatter(20)],
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Color(0xffF2F3F7),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          labelText: "Email address",
-                          labelStyle: GoogleFonts.rubik(
-                              fontSize: 16, fontWeight: FontWeight.w300),
-                        ),
-                      ),
                     ),
                     Positioned(
                       top: 120.0, // signup.png'nin içinde konumlandırmak için
