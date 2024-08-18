@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -57,19 +58,55 @@ class _MainScreenViewState extends State<MainScreenView> {
               ),
               child: Text('Drawer Header'),
             ),
-            ListTile(
-              title: const Text('Item 1'),
-              onTap: () {
-                // Update the state of the app.
-                // ...
-              },
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Card(
+                child: ListTile(
+                  title: const Text('Home Screen'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    // Update the state of the app.
+                    // ...
+                  },
+                  trailing: Icon(Icons.home),
+                ),
+              ),
             ),
-            ListTile(
-              title: const Text('Logout'),
-              onTap: () {
-                FirebaseAuth.instance.signOut();
-                Navigator.of(context).pushReplacementNamed(welcomePageRoute);
-              },
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Card(
+                child: ListTile(
+                  title: const Text('Sign Out'),
+                  onTap: () async {
+                    final isLogOut = await showLogOutDialog(context);
+                    if (isLogOut) {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          welcomePageRoute, (_) => false);
+                    }
+                  },
+                  trailing: Icon(Icons.logout),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Card(
+                child: ListTile(
+                  title: const Text('Delete the account'),
+                  onTap: () async {
+                    FirebaseAuth.instance.currentUser!.delete();
+                    final SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.setBool("res", true);
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, welcomePageRoute, (route) => false);
+                    // Update the state of the app.
+                    // ...
+                  },
+                  trailing: Icon(Icons.delete),
+                ),
+              ),
             ),
           ],
         ),
@@ -291,4 +328,30 @@ class _IndicatorState extends State<Indicator> {
       ],
     );
   }
+}
+
+Future<bool> showLogOutDialog(BuildContext context) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Sign out'),
+        content: const Text('Are you sure?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: const Text('Sign out'),
+          ),
+        ],
+      );
+    },
+  ).then((value) => value ?? false);
 }
