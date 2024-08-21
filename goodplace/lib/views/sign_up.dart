@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/utils/show_error_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -14,14 +15,24 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   var tfUserNameController = TextEditingController();
-  String userName = "";
   var tfMailController = TextEditingController();
   var tfPassController = TextEditingController();
+  String userName = "";
   bool isNameValid = true;
   bool isGmailValid = true;
   bool isPasswordValid = true;
   bool _obscureText = true;
   bool ischeckBox = false;
+
+  void userNameCheck() {
+    setState(() {
+      if (tfUserNameController.text.isEmpty) {
+        isNameValid = false;
+      } else {
+        isNameValid = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -248,35 +259,44 @@ class _SignUpPageState extends State<SignUpPage> {
               height: 57,
               child: ElevatedButton(
                 onPressed: () async {
-                  userName = tfUserNameController.text;
-                  final email = tfMailController.text;
-                  //tfMail -> tfPassController
-                  final password = tfPassController.text;
-                  try {
-                    final userCredentials = await FirebaseAuth.instance
-                        .createUserWithEmailAndPassword(
-                      email: email,
-                      password: password,
-                    );
-                    Navigator.of(context).pushNamed(
-                      onBoardViewRoute,
-                    );
-                  } on FirebaseAuthException catch (e) {
-                    if (e.code == 'weak-password') {
-                      await showErrorDialog(context, 'Weak Password');
-                    } else if (e.code == 'email-already-in-use') {
-                      await showErrorDialog(context, 'Email is already in use');
-                    } else if (e.code == 'invalid-email') {
-                      await showErrorDialog(context, 'Invalid Email');
-                    } else {
+                  userNameCheck();
+                  if (isNameValid) {
+                    userName = tfUserNameController.text;
+                    final email = tfMailController.text;
+                    final password = tfPassController.text;
+                    final SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.setString(email, userName);
+                    try {
+                      final userCredentials = await FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+                      Navigator.of(context).pushNamed(
+                        onBoardViewRoute,
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == 'weak-password') {
+                        await showErrorDialog(context, 'Weak Password');
+                      } else if (e.code == 'email-already-in-use') {
+                        await showErrorDialog(
+                            context, 'Email is already in use');
+                      } else if (e.code == 'invalid-email') {
+                        await showErrorDialog(context, 'Invalid Email');
+                      } else {
+                        await showErrorDialog(
+                            context, 'Email and password must be entered!');
+                      }
+                    } catch (e) {
                       await showErrorDialog(
-                          context, 'Email and password must be entered!');
+                        context,
+                        e.toString(),
+                      );
                     }
-                  } catch (e) {
+                  } else {
                     await showErrorDialog(
-                      context,
-                      e.toString(),
-                    );
+                        context, 'User name can not be empty');
                   }
                 },
                 style: ElevatedButton.styleFrom(

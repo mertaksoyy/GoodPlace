@@ -18,12 +18,12 @@ class _OnBoardPageState extends State<OnBoardPage> {
   void _onNextButtonPressed() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (pageController.page == controller.items.length - 1) {
-      prefs.setBool('res', false);
+      await prefs.setBool('res', false);
       Navigator.of(context)
           .pushNamedAndRemoveUntil(mainPageRoute, (route) => false);
     } else {
       // Kullanıcı diğer sayfalardaysa, bir sonraki sayfaya geç
-      prefs.setBool('res', true);
+      await prefs.setBool('res', true);
       pageController.nextPage(
         duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,

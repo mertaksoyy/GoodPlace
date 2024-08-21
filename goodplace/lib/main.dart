@@ -51,15 +51,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool showOnboarding = true;
+
+  @override
   void initState() {
-    loadPrefs;
     super.initState();
+    loadPrefs(); // loadPrefs fonksiyonunun çağrılma şekli düzeltildi
   }
 
-  Future<void> get loadPrefs async {
+  Future<void> loadPrefs() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    showOnboarding = prefs.getBool('res') ?? true;
-    print(showOnboarding);
+    setState(() {
+      showOnboarding = prefs.getBool('res') ?? true;
+    });
   }
 
   @override

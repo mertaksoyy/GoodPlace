@@ -13,12 +13,13 @@ class MainScreenView extends StatefulWidget {
 }
 
 class _MainScreenViewState extends State<MainScreenView> {
+  String? userName;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   String quote =
       "There is an inspirational quote waiting for you just a click away!";
-
+  String? email;
   Future<void> fetchRandomQuote() async {
     final response =
         await http.get(Uri.parse("https://api.quotable.io/random"));
@@ -34,17 +35,32 @@ class _MainScreenViewState extends State<MainScreenView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    getUserName;
+    final user = FirebaseAuth.instance.currentUser;
+    email = user?.email;
+  }
+
+  Future<void> get getUserName async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString(email!);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Color(0xff8E97FD),
         title: Text(
-          "Habit Page",
+          "Merhaba, ${userName}",
           style: GoogleFonts.rubik(
               fontWeight: FontWeight.normal,
               fontStyle: FontStyle.italic,
-              fontSize: 25),
+              fontSize: 20),
         ),
       ),
       drawer: Drawer(
@@ -94,11 +110,11 @@ class _MainScreenViewState extends State<MainScreenView> {
               child: Card(
                 child: ListTile(
                   title: const Text('Delete the account'),
-                  onTap: () async {
-                    FirebaseAuth.instance.currentUser!.delete();
-                    final SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.setBool("res", true);
+                  onTap: () {
+                    deleteUserAccount();
+                    //final SharedPreferences prefs =
+                    //    await SharedPreferences.getInstance();
+                    //prefs.setBool("res", true);
                     Navigator.pushNamedAndRemoveUntil(
                         context, welcomePageRoute, (route) => false);
                     // Update the state of the app.
@@ -354,4 +370,40 @@ Future<bool> showLogOutDialog(BuildContext context) {
       );
     },
   ).then((value) => value ?? false);
+}
+
+Future<void> deleteUserAccount() async {
+  try {
+    await FirebaseAuth.instance.currentUser!.delete();
+  } on FirebaseAuthException catch (e) {
+    print(e.code);
+
+    if (e.code == "requires-recent-login") {
+      await _reauthenticateAndDelete();
+    } else {
+      // Handle other Firebase exceptions
+    }
+  } catch (e) {
+    print(e);
+
+    // Handle general exception
+  }
+}
+
+Future<void> _reauthenticateAndDelete() async {
+  try {
+    final providerData = FirebaseAuth.instance.currentUser?.providerData.first;
+
+    if (AppleAuthProvider().providerId == providerData!.providerId) {
+      await FirebaseAuth.instance.currentUser!
+          .reauthenticateWithProvider(AppleAuthProvider());
+    } else if (GoogleAuthProvider().providerId == providerData.providerId) {
+      await FirebaseAuth.instance.currentUser!
+          .reauthenticateWithProvider(GoogleAuthProvider());
+    }
+
+    await FirebaseAuth.instance.currentUser?.delete();
+  } catch (e) {
+    // Handle exceptions
+  }
 }
