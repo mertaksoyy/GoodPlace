@@ -1,7 +1,10 @@
+import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
@@ -14,12 +17,82 @@ class MainScreenView extends StatefulWidget {
 
 class _MainScreenViewState extends State<MainScreenView> {
   String? userName;
+  int totalHabit = 0; // Toplam habit sayısını tutmak için değişken
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   String quote =
       "There is an inspirational quote waiting for you just a click away!";
   String? email;
+  int highStreak = 0;
+  DateTime? lastUpdatedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserName();
+    final user = FirebaseAuth.instance.currentUser;
+    email = user?.email;
+    _loadTotalHabit();
+  }
+
+  Future<void> _refreshData() async {
+    await _fetchHabitData();
+    await _loadTotalHabit();
+  }
+
+  // Firebase'den habit verilerini çeker
+  Future<void> _fetchHabitData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('habits')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      int maxStreak = 0;
+      DateTime? lastDate;
+
+      for (var doc in snapshot.docs) {
+        final int streak = doc['streakCount'] ?? 0;
+        final Timestamp? lastUpdate = doc['lastUpdatedDate'] as Timestamp?;
+        final DateTime? date = lastUpdate?.toDate();
+
+        if (streak > maxStreak) {
+          maxStreak = streak;
+        }
+
+        if (date != null && (lastDate == null || date.isAfter(lastDate))) {
+          lastDate = date;
+        }
+      }
+
+      setState(() {
+        highStreak = maxStreak;
+        lastUpdatedDate = lastDate;
+      });
+    } catch (e) {
+      print("Alışkanlık verilerini çekerken hata: $e");
+    }
+  }
+
+  // SharedPreferences'tan toplam habit sayısını yükler
+  Future<void> _loadTotalHabit() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      totalHabit = prefs.getInt('totalHabit') ?? 0; // Varsayılan olarak 0 al
+    });
+  }
+
+  Future<void> getUserName() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString(email!);
+    });
+  }
+
   Future<void> fetchRandomQuote() async {
     final response =
         await http.get(Uri.parse("https://api.quotable.io/random"));
@@ -35,18 +108,10 @@ class _MainScreenViewState extends State<MainScreenView> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    getUserName;
-    final user = FirebaseAuth.instance.currentUser;
-    email = user?.email;
-  }
-
-  Future<void> get getUserName async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString(email!);
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadTotalHabit(); // Sayfa geri geldiğinde totalHabit'i yeniden yükle
+    _fetchHabitData();
   }
 
   @override
@@ -56,7 +121,7 @@ class _MainScreenViewState extends State<MainScreenView> {
         centerTitle: true,
         backgroundColor: Color(0xff8E97FD),
         title: Text(
-          "Merhaba, ${userName}",
+          "Merhaba, ${userName ?? ''}",
           style: GoogleFonts.rubik(
               fontWeight: FontWeight.normal,
               fontStyle: FontStyle.italic,
@@ -65,14 +130,20 @@ class _MainScreenViewState extends State<MainScreenView> {
       ),
       drawer: Drawer(
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Color(0xff8E97FD),
               ),
-              child: Text('Drawer Header'),
+              child: Text(
+                'Menu',
+                style: GoogleFonts.rubik(
+                    fontSize: 25,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xffFFECCC)),
+              ),
             ),
             Padding(
               padding: EdgeInsets.all(8),
@@ -81,8 +152,6 @@ class _MainScreenViewState extends State<MainScreenView> {
                   title: const Text('Home Screen'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    // Update the state of the app.
-                    // ...
                   },
                   trailing: Icon(Icons.home),
                 ),
@@ -112,13 +181,8 @@ class _MainScreenViewState extends State<MainScreenView> {
                   title: const Text('Delete the account'),
                   onTap: () {
                     deleteUserAccount();
-                    //final SharedPreferences prefs =
-                    //    await SharedPreferences.getInstance();
-                    //prefs.setBool("res", true);
                     Navigator.pushNamedAndRemoveUntil(
                         context, welcomePageRoute, (route) => false);
-                    // Update the state of the app.
-                    // ...
                   },
                   trailing: Icon(Icons.delete),
                 ),
@@ -137,7 +201,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                 borderRadius: BorderRadius.circular(16.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
+                    color: Color.fromARGB(31, 252, 2, 2),
                     blurRadius: 10,
                     spreadRadius: 5,
                   ),
@@ -178,7 +242,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                     ),
                     selectedTextStyle: TextStyle(color: Colors.white),
                     selectedDecoration: BoxDecoration(
-                      color: Colors.red,
+                      color: Colors.orange,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -211,27 +275,26 @@ class _MainScreenViewState extends State<MainScreenView> {
               child: GestureDetector(
                 onTap: fetchRandomQuote,
                 child: Container(
-                  padding: EdgeInsets.all(
-                      16), // İçerik ile sınırlar arasındaki boşluk
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white, // Arka plan rengi
-                    borderRadius:
-                        BorderRadius.circular(12), // Köşe yuvarlaklığı
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     quote,
                     style: GoogleFonts.rubik(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xff4D57C8)), // Yazı rengi
-                    textAlign: TextAlign.center, // Yazıyı ortalar
+                        color: Color(0xff4D57C8)),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
             ),
             GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, habitPageViewRoute);
+              onTap: () async {
+                await Navigator.pushNamed(context, habitPageViewRoute);
+                _refreshData(); // Sayfaya geri dönüldüğünde _loadTotalHabit(),_fetchHabitData() çağırılıyor
               },
               child: Container(
                 height: 220,
@@ -301,9 +364,81 @@ class _MainScreenViewState extends State<MainScreenView> {
                           ],
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
+              ),
+            ),
+            Container(
+              height: 160,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 3,
+                itemBuilder: (context, index) {
+                  String title;
+                  String content;
+                  switch (index) {
+                    case 0:
+                      title = "En Yüksek Streak";
+                      content = "${highStreak} Gün";
+                      break;
+                    case 1:
+                      title = "Toplam Habit Sayısı";
+                      content = "${totalHabit.toString()}";
+                      break;
+                    case 2:
+                      title = "Son Habit Tarihi";
+                      content = lastUpdatedDate != null
+                          ? DateFormat('dd MMM yyyy').format(lastUpdatedDate!)
+                          : "Güncelleme Yok";
+                      break;
+                    default:
+                      title = "Veri Yok";
+                      content = "";
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Card(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Container(
+                        width: 150, // Kartların genişliğini belirleyin
+                        decoration: BoxDecoration(
+                          color: Color(
+                              0xffF1D3CE), // Arka plan rengi burada ayarlandı
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              title,
+                              style: GoogleFonts.rubik(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff4D57C8),
+                              ),
+                            ),
+                            SizedBox(
+                                height:
+                                    10), // Başlık ve içerik arasındaki boşluk
+                            Text(
+                              content,
+                              style: GoogleFonts.rubik(
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                                color: Color(0xff4D57C8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             )
           ],
@@ -385,8 +520,6 @@ Future<void> deleteUserAccount() async {
     }
   } catch (e) {
     print(e);
-
-    // Handle general exception
   }
 }
 

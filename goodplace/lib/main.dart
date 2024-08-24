@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    loadPrefs(); // loadPrefs fonksiyonunun çağrılma şekli düzeltildi
+    loadPrefs();
   }
 
   Future<void> loadPrefs() async {
