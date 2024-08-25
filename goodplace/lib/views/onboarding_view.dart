@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/onboarding/onboarding_items.dart';
+import 'package:goodplace/username_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnBoardPage extends StatefulWidget {
@@ -33,6 +35,8 @@ class _OnBoardPageState extends State<OnBoardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final username = context.watch<UserNameProvider>().getUserName;
+    print("Onboardin $username");
     return Scaffold(
       body: Container(
         width: double.infinity,
