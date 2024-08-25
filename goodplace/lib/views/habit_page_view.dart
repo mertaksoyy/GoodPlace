@@ -1,11 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class HabitPageView extends StatefulWidget {
   const HabitPageView({super.key});
@@ -15,13 +17,15 @@ class HabitPageView extends StatefulWidget {
 }
 
 class _HabitPageViewState extends State<HabitPageView> {
+  final _formKey = GlobalKey<FormState>(); // Form durumu için GlobalKey
   TextEditingController titleController = TextEditingController();
   TextEditingController purposeController = TextEditingController();
   String todayDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
   int streakCount = 0;
+  int totalHabit = 0;
   late TextEditingController _controller;
-
-  File? selectedImage; // Seçilen resmi saklamak için
+  File? selectedImage;
+  final String openAiApiKey = '9070bb36762b4ddc8552f51b98091334';
 
   final CollectionReference habitsCollection =
       FirebaseFirestore.instance.collection("habits");
@@ -33,63 +37,136 @@ class _HabitPageViewState extends State<HabitPageView> {
   void initState() {
     _controller = TextEditingController(text: streakCount.toString());
     super.initState();
+    _loadTotalHabit(); // Uygulama başladığında totalHabit'i yükle
+  }
+
+  // Azure OpenAI API'sine title göndererek purpose oluşturma fonksiyonu
+  Future<String> generatePurpose(String title) async {
+    final url = Uri.parse(
+        'https://patrons-openai.openai.azure.com/openai/deployments/GrowTogether/chat/completions?api-version=2024-02-15-preview');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': openAiApiKey,
+      },
+      body: jsonEncode({
+        'messages': [
+          {
+            'role': 'system',
+            'content':
+                'You are a helpful assistant that generates short purposes for habits.'
+          },
+          {
+            'role': 'user',
+            'content':
+                'Write a short purpose for the habit titled "$title". Purpose should be concise and under 25 characters.'
+          }
+        ],
+        'max_tokens': 25,
+        'temperature': 0.7,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final purpose = data['choices'][0]['message']['content'].trim();
+      return purpose;
+    } else {
+      throw Exception('Failed to generate purpose');
+    }
+  }
+
+  Future<void> _loadTotalHabit() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      totalHabit = prefs.getInt('totalHabit') ?? 0; // Eğer yoksa 0 olarak al
+    });
+  }
+
+  Future<void> _updateTotalHabit(int newValue) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      totalHabit = newValue;
+      prefs.setInt('totalHabit', totalHabit); // totalHabit'i sakla
+    });
   }
 
   Future<void> storeData() async {
-    try {
-      String title = titleController.text;
-      String purpose = purposeController.text;
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        String title = titleController.text;
+        String purpose = purposeController
+            .text; // Kullanıcı ya da AI tarafından oluşturulmuş purpose
 
-      // İlk kez oluştururken streak count artırılmıyor
-      await habitsCollection.add({
-        'title': title,
-        'purpose': purpose,
-        'streakCount': streakCount,
-        'lastUpdatedDate': null,
-        'imagePath': selectedImage != null
-            ? selectedImage!.path
-            : null, // Store image path
-        'userId': currentUser?.uid, // Oturum açmış kullanıcının UID'sini ekle
-      });
+        // Yeni bir habit eklerken veritabanına yazma işlemi
+        await habitsCollection.add({
+          'title': title,
+          'purpose': purpose,
+          'streakCount': streakCount,
+          'lastUpdatedDate': null,
+          'imagePath': selectedImage != null
+              ? selectedImage!.path
+              : null, // Store image path
+          'userId': currentUser?.uid, // Oturum açmış kullanıcının UID'sini ekle
+        });
 
-      Navigator.pop(context); // Verileri kaydettikten sonra dialog'u kapat
-    } catch (e) {
-      print("Error saving data: $e");
+        // Veritabanına başarılı bir şekilde yazıldıktan sonra totalHabit'i artır
+        await _updateTotalHabit(totalHabit + 1);
+
+        // Verileri kaydettikten sonra formu resetle ve dialog'u kapat
+        resetForm();
+        Navigator.pop(context);
+      } catch (e) {
+        print("Error saving data: $e");
+      }
     }
   }
 
   Future<void> updateData(DocumentSnapshot document) async {
-    try {
-      String title = titleController.text;
-      String purpose = purposeController.text;
-      int currentStreakCount = document['streakCount'];
-      DateTime? lastUpdatedDate = (document['lastUpdatedDate'] != null)
-          ? (document['lastUpdatedDate'] as Timestamp).toDate()
-          : null;
-      DateTime today = DateTime.now();
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        String title = titleController.text;
+        String purpose = purposeController.text;
+        int currentStreakCount = document['streakCount'];
+        DateTime? lastUpdatedDate = (document['lastUpdatedDate'] != null)
+            ? (document['lastUpdatedDate'] as Timestamp).toDate()
+            : null;
+        DateTime today = DateTime.now();
 
-      // Eğer streakCount bugün zaten artırılmışsa artırma
-      if (lastUpdatedDate == null ||
-          lastUpdatedDate.day != today.day ||
-          lastUpdatedDate.month != today.month ||
-          lastUpdatedDate.year != today.year) {
-        currentStreakCount += 1;
+        // Eğer streakCount bugün zaten artırılmışsa artırma
+        if (lastUpdatedDate == null ||
+            lastUpdatedDate.day != today.day ||
+            lastUpdatedDate.month != today.month ||
+            lastUpdatedDate.year != today.year) {
+          currentStreakCount += 1;
 
+          await habitsCollection.doc(document.id).update({
+            'streakCount': currentStreakCount,
+            'lastUpdatedDate': today,
+          });
+        }
+
+        // Streak count artırılsın veya artırılmasın title ve purpose'ı güncelle
         await habitsCollection.doc(document.id).update({
           'title': title,
           'purpose': purpose,
-          'streakCount': currentStreakCount,
-          'lastUpdatedDate': today,
         });
 
         Navigator.pop(context); // Verileri güncelledikten sonra dialog'u kapat
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Streak can only be increased once per day."),
-        ));
+      } catch (e) {
+        print("Error updating data: $e");
       }
+    }
+  }
+
+  Future<void> deleteHabit(DocumentSnapshot document) async {
+    try {
+      await habitsCollection.doc(document.id).delete();
+      _updateTotalHabit(totalHabit - 1); // Habit silindiğinde azalt
     } catch (e) {
-      print("Error updating data: $e");
+      print("Error deleting data: $e");
     }
   }
 
@@ -99,7 +176,7 @@ class _HabitPageViewState extends State<HabitPageView> {
       purposeController.clear();
       streakCount = 0;
       _controller.text = streakCount.toString();
-      selectedImage = null; // Form resetlendiğinde seçilen resmi de sıfırla
+      selectedImage = null;
     });
   }
 
@@ -279,74 +356,105 @@ class _HabitPageViewState extends State<HabitPageView> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: SingleChildScrollView(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Create Your Habit",
-                      style: GoogleFonts.rubik(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: Colors.blue),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        resetForm();
-                      },
-                      icon: Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                commonTextField("Title", titleController),
-                commonTextField("Purpose", purposeController),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: TextFormField(
-                    controller: _controller,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: "Streak Count",
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                          borderSide: BorderSide(color: Colors.blue, width: 2)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                          borderSide:
-                              BorderSide(color: Colors.black, width: 2)),
+        child: Form(
+          key: _formKey, // Form widget'ı içine GlobalKey ekleyin
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Create Your Habit",
+                        style: GoogleFonts.rubik(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.blue),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _updateTotalHabit(totalHabit);
+                          resetForm();
+                        },
+                        icon: Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  commonTextField("Title", titleController),
+                  commonTextField("Purpose", purposeController),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: TextFormField(
+                      controller: _controller,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: "Streak Count",
+                        focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 2)),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 2)),
+                      ),
                     ),
                   ),
-                ),
-                selectedImage != null
-                    ? Image.file(
-                        selectedImage!,
-                        height: 100,
-                        width: 100,
-                      )
-                    : Text("The photo you selected will be displayed!"),
-                ElevatedButton(
-                  child: Text("Insert an image from gallery"),
-                  onPressed: () {
-                    _pickImageFromGallery(null);
-                  },
-                ),
-                ElevatedButton(
-                  child: Text("Create Habit"),
-                  onPressed: onPressed,
-                ),
-              ],
+                  selectedImage != null
+                      ? Image.file(
+                          selectedImage!,
+                          height: 100,
+                          width: 100,
+                        )
+                      : Text("The photo you selected will be displayed!"),
+                  ElevatedButton(
+                    child: Text("Insert an image from gallery"),
+                    onPressed: () {
+                      _pickImageFromGallery(null);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        child: Text("Create With AI"),
+                        onPressed: () async {
+                          if (titleController.text.isNotEmpty) {
+                            try {
+                              // Yapay zeka ile purpose üretme kısmı
+                              String purpose =
+                                  await generatePurpose(titleController.text);
+
+                              // Purpose'ı TextController'a yaz
+                              setState(() {
+                                purposeController.text = purpose;
+                              });
+                            } catch (e) {
+                              print("Error generating AI purpose: $e");
+                            }
+                          } else {
+                            print("Title field cannot be empty");
+                          }
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text("Create Habit"),
+                        onPressed: onPressed,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -364,75 +472,79 @@ class _HabitPageViewState extends State<HabitPageView> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: SingleChildScrollView(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Edit Your Habit",
-                      style: GoogleFonts.rubik(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: Colors.blue),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        resetForm();
-                      },
-                      icon: Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                commonTextField("Title", titleController),
-                commonTextField("Purpose", purposeController),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: TextFormField(
-                    controller: _controller,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: "Streak Count",
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                          borderSide: BorderSide(color: Colors.blue, width: 2)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                          borderSide:
-                              BorderSide(color: Colors.black, width: 2)),
+        child: Form(
+          key: _formKey, // Form widget'ı içine GlobalKey ekleyin
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Edit Your Habit",
+                        style: GoogleFonts.rubik(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.blue),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          resetForm();
+                        },
+                        icon: Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  commonTextField("Title", titleController),
+                  commonTextField("Purpose", purposeController),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: TextFormField(
+                      controller: _controller,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: "Streak Count",
+                        focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 2)),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 2)),
+                      ),
                     ),
                   ),
-                ),
-                document['imagePath'] != null
-                    ? Image.file(
-                        File(document['imagePath']),
-                        height: 100,
-                        width: 100,
-                      )
-                    : Text("No image selected"),
-                ElevatedButton(
-                  child: Text("Done"),
-                  onPressed: onPressed,
-                ),
-                ElevatedButton(
-                  child: Text("Insert an image from gallery"),
-                  onPressed: () {
-                    _pickImageFromGallery(document.id);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
+                  document['imagePath'] != null
+                      ? Image.file(
+                          File(document['imagePath']),
+                          height: 100,
+                          width: 100,
+                        )
+                      : Text("No image selected"),
+                  ElevatedButton(
+                    child: Text("Done"),
+                    onPressed: onPressed,
+                  ),
+                  ElevatedButton(
+                    child: Text("Insert an image from gallery"),
+                    onPressed: () {
+                      _pickImageFromGallery(document.id);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -454,16 +566,14 @@ class _HabitPageViewState extends State<HabitPageView> {
               borderRadius: BorderRadius.circular(20.0),
               borderSide: BorderSide(color: Colors.black, width: 2)),
         ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return '$label cannot be empty'; // Hata mesajını göster
+          }
+          return null;
+        },
       ),
     );
-  }
-
-  Future<void> deleteHabit(DocumentSnapshot document) async {
-    try {
-      await habitsCollection.doc(document.id).delete();
-    } catch (e) {
-      print("Error deleting data: $e");
-    }
   }
 
   Future<void> _pickImageFromGallery(String? documentId) async {

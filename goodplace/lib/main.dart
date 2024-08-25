@@ -63,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     loadPrefs();
-// loadPrefs fonksiyonunun çağrılma şekli düzeltildi
   }
 
   // Veriyi yükledikten sonra UserNameProvider'ı güncelleyin
