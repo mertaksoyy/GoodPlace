@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/username_provider.dart';
 import 'package:goodplace/utils/show_error_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInView extends StatefulWidget {
@@ -17,19 +19,13 @@ class _SignInViewState extends State<SignInView> {
   late final tfMailController;
   late final tfPassController;
   bool showOnboarding = true;
-
+  String userName = "";
   @override
   void initState() {
     tfMailController = TextEditingController();
     tfPassController = TextEditingController();
-    loadPrefs;
+    loadPrefs();
     super.initState();
-  }
-
-  Future<void> get loadPrefs async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    showOnboarding = prefs.getBool('res') ?? true;
-    print(showOnboarding);
   }
 
   @override
@@ -39,6 +35,11 @@ class _SignInViewState extends State<SignInView> {
     tfMailController.dispose();
     tfPassController.dispose();
     super.dispose();
+  }
+
+  void loadPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    showOnboarding = prefs.getBool('res') ?? true;
   }
 
   @override
@@ -58,97 +59,6 @@ class _SignInViewState extends State<SignInView> {
                         Align(
                           alignment: Alignment.center,
                           child: Image.asset('assets/images/signup.png'),
-                        ),
-                        Positioned(
-                          left: 17,
-                          top: 50,
-                          child: GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(context, welcomePageRoute);
-                              },
-                              child: Image.asset(
-                                  'assets/images/sign_up_back.png')),
-                        ),
-                        Positioned(
-                          top:
-                              120.0, // signup.png'nin içinde konumlandırmak için
-                          left:
-                              95.0, // signup.png'nin içinde konumlandırmak için
-                          child: Text(
-                            "Welcome Back!",
-                            style: GoogleFonts.rubik(
-                                fontSize: 28, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Positioned(
-                            top: 155,
-                            left: 0,
-                            child: Image.asset(
-                              'assets/images/signupdesign.png',
-                              color: // Color(0xffFAF8F5)
-                                  const Color.fromARGB(255, 240, 239, 237),
-                            )),
-                        Positioned(
-                          top: 260,
-                          left:
-                              45, // Butonu biraz daha ortalamak için left değerini değiştirdim
-                          child: Center(
-                            child: SizedBox(
-                              width: 300, // Genişliği artırdım
-                              height: 60, // Yüksekliği artırdım
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  try {
-                                    final GoogleSignInAccount? userWithGoogle =
-                                        await GoogleSignIn().signIn();
-                                    final GoogleSignInAuthentication userAuth =
-                                        await userWithGoogle!.authentication;
-                                    final credentials =
-                                        GoogleAuthProvider.credential(
-                                      accessToken: userAuth.accessToken,
-                                      idToken: userAuth.idToken,
-                                    );
-                                    final UserCredential userCredential =
-                                        await FirebaseAuth.instance
-                                            .signInWithCredential(credentials);
-                                    print(userCredential.user?.email);
-                                  } on FirebaseAuthException catch (e) {
-                                    print(e.code);
-                                  }
-                                  Navigator.of(context)
-                                      .pushNamed(onBoardViewRoute);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 15),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset(
-                                      "assets/images/googlesignin.png",
-                                      width: 20,
-                                      height: 20,
-                                    ),
-                                    const SizedBox(
-                                        width:
-                                            15), // İkon ve metin arasındaki boşluk
-                                    Text(
-                                      "CONTINUE WITH GOOGLE",
-                                      style: GoogleFonts.rubik(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff3F414E), // Metin rengi
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                         ),
                       ],
                     ),
@@ -287,6 +197,9 @@ class _SignInViewState extends State<SignInView> {
                           email: email,
                           password: password,
                         );
+                        User? user = FirebaseAuth.instance.currentUser;
+                        final name = user?.displayName;
+                        context.read<UserNameProvider>().setUserName(name!);
                         Navigator.of(context).pushNamedAndRemoveUntil(
                             mainPageRoute, (route) => false);
                       } on FirebaseAuthException catch (e) {
@@ -363,25 +276,19 @@ class _SignInViewState extends State<SignInView> {
       ),
     );
   }
-}
 
-Future<UserCredential> signInWithGoogle() async {
-  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-  if (googleUser == null) {
-    print('Google user is null');
+  signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) return;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    userName = googleUser.displayName!;
+    print('username is $userName');
+    context.read<UserNameProvider>().setUserName(userName);
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
-
-  // Obtain the auth details from the request
-  final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
-
-  // Create a new credential
-  final credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth?.accessToken,
-    idToken: googleAuth?.idToken,
-  );
-
-  // Once signed in, return the UserCredential
-  return await FirebaseAuth.instance.signInWithCredential(credential);
 }

@@ -2,9 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/main.dart';
+import 'package:goodplace/username_provider.dart';
 import 'package:goodplace/utils/show_error_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -264,15 +266,19 @@ class _SignUpPageState extends State<SignUpPage> {
                     userName = tfUserNameController.text;
                     final email = tfMailController.text;
                     final password = tfPassController.text;
-                    final SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.setString(email, userName);
                     try {
                       final userCredentials = await FirebaseAuth.instance
                           .createUserWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
+                      User? user = FirebaseAuth.instance.currentUser;
+                      await user?.updateDisplayName(userName);
+                      await user?.reload();
+                      user = FirebaseAuth.instance.currentUser;
+                      final name = user?.displayName;
+                      print("esf $name");
+                      context.read<UserNameProvider>().setUserName(name!);
                       Navigator.of(context).pushNamed(
                         onBoardViewRoute,
                       );

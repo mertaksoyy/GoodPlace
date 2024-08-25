@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/username_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
@@ -19,7 +21,7 @@ class _MainScreenViewState extends State<MainScreenView> {
   DateTime? _selectedDay;
   String quote =
       "There is an inspirational quote waiting for you just a click away!";
-  String? email;
+
   Future<void> fetchRandomQuote() async {
     final response =
         await http.get(Uri.parse("https://api.quotable.io/random"));
@@ -35,28 +37,16 @@ class _MainScreenViewState extends State<MainScreenView> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    getUserName;
-    final user = FirebaseAuth.instance.currentUser;
-    email = user?.email;
-  }
-
-  Future<void> get getUserName async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString(email!);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    userName = context.watch<UserNameProvider>().getUserName;
+    print("daswd $userName");
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Color(0xff8E97FD),
         title: Text(
-          "Merhaba, ${userName}",
+          "Merhaba, $userName",
           style: GoogleFonts.rubik(
               fontWeight: FontWeight.normal,
               fontStyle: FontStyle.italic,
@@ -375,6 +365,8 @@ Future<bool> showLogOutDialog(BuildContext context) {
 Future<void> deleteUserAccount() async {
   try {
     await FirebaseAuth.instance.currentUser!.delete();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
   } on FirebaseAuthException catch (e) {
     print(e.code);
 
