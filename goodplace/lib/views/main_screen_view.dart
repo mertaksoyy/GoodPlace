@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/models/habit.dart';
 import 'package:goodplace/username_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,9 @@ class _MainScreenViewState extends State<MainScreenView> {
   int highStreak = 0;
   DateTime? lastUpdatedDate;
 
+  late int length;
+  List<String> habitTitles = [];
+
   @override
   void initState() {
     super.initState();
@@ -40,9 +44,21 @@ class _MainScreenViewState extends State<MainScreenView> {
     await _loadTotalHabit();
   }
 
+  Stream<List<Habit>> habitStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    return FirebaseFirestore.instance
+        .collection('habits')
+        .where('userId', isEqualTo: user?.uid)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => Habit.fromFirestore(doc)).toList();
+    });
+  }
+
   // Firebase'den habit verilerini çeker
   Future<void> _fetchHabitData() async {
     final user = FirebaseAuth.instance.currentUser;
+    length = 0;
     if (user == null) return;
 
     try {
@@ -51,6 +67,9 @@ class _MainScreenViewState extends State<MainScreenView> {
           .where('userId', isEqualTo: user.uid)
           .get();
 
+      length = snapshot.size;
+      print('length');
+
       int maxStreak = 0;
       DateTime? lastDate;
 
@@ -58,6 +77,8 @@ class _MainScreenViewState extends State<MainScreenView> {
         final int streak = doc['streakCount'] ?? 0;
         final Timestamp? lastUpdate = doc['lastUpdatedDate'] as Timestamp?;
         final DateTime? date = lastUpdate?.toDate();
+        final habitTitle = doc['title'] ?? '';
+        habitTitles.add(habitTitle);
 
         if (streak > maxStreak) {
           maxStreak = streak;
@@ -109,7 +130,6 @@ class _MainScreenViewState extends State<MainScreenView> {
   @override
   Widget build(BuildContext context) {
     userName = context.watch<UserNameProvider>().getUserName;
-    print("daswd $userName");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -229,6 +249,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                   },
                   calendarStyle: CalendarStyle(
                     defaultTextStyle: TextStyle(color: Colors.blue),
+                    weekendTextStyle: TextStyle(color: Colors.blue),
                     todayTextStyle: TextStyle(color: Colors.white),
                     todayDecoration: BoxDecoration(
                       color: Colors.blue,
@@ -362,6 +383,42 @@ class _MainScreenViewState extends State<MainScreenView> {
                   ],
                 ),
               ),
+            ),
+            const ListTile(
+              title: Center(child: Text('ALL HABITS')),
+            ),
+            StreamBuilder<List<Habit>>(
+              stream: habitStream(), // Verileri dinleyen stream fonksiyonu
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No habits found.'));
+                } else {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        color: Color(0xffE6E6FA),
+                        child: ListTile(
+                          onTap: () {
+                            //
+                          },
+                          leading: Icon(
+                            Icons.star,
+                            color: Colors.yellow,
+                          ),
+                          title: Text(snapshot.data![index].title),
+                          trailing: Text(snapshot.data![index].formattedDate),
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
             ),
             Container(
               height: 160,
