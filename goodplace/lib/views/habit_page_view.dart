@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -190,10 +191,12 @@ class _HabitPageViewState extends State<HabitPageView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xff556B2F),
         centerTitle: true,
         title: const Text(
           "My Habits",
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.normal),
+          style: TextStyle(
+              fontSize: 25, fontWeight: FontWeight.w600, color: Colors.white),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -201,6 +204,7 @@ class _HabitPageViewState extends State<HabitPageView> {
             .where('userId',
                 isEqualTo: currentUser
                     ?.uid) // Yalnızca oturum açmış kullanıcının alışkanlıklarını filtrele
+
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -245,6 +249,7 @@ class _HabitPageViewState extends State<HabitPageView> {
                         Container(
                           width: MediaQuery.of(context).size.width / 2 - 15,
                           child: Card(
+                            color: Color(0xffE6E6FA),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.0),
                             ),
@@ -257,24 +262,37 @@ class _HabitPageViewState extends State<HabitPageView> {
                                   Text(
                                     habit['title'],
                                     style: GoogleFonts.rubik(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xff8B4513)),
                                   ),
                                   SizedBox(height: 10),
                                   Text(
                                     "Purpose: ${habit['purpose']}",
-                                    style: GoogleFonts.rubik(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    "Streak Count: ${habit['streakCount']}",
-                                    style: GoogleFonts.rubik(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    "Today: $todayDate",
                                     style: GoogleFonts.rubik(
-                                        fontSize: 16, color: Colors.blueGrey),
+                                        fontSize: 13, color: Color(0xff8B4513)),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.whatshot,
+                                        color: Colors.orange,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        habit['streakCount'].toString(),
+                                        style: GoogleFonts.rubik(fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Day: $todayDate",
+                                    style: GoogleFonts.rubik(
+                                        fontSize: 13,
+                                        color:
+                                            Color.fromARGB(255, 240, 70, 40)),
                                   ),
                                   habit['imagePath'] != null
                                       ? Image.file(
@@ -282,7 +300,7 @@ class _HabitPageViewState extends State<HabitPageView> {
                                           height: 100,
                                           width: 100,
                                         )
-                                      : Text("No image selected"),
+                                      : Text(""),
                                 ],
                               ),
                             ),
@@ -334,7 +352,7 @@ class _HabitPageViewState extends State<HabitPageView> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xff607D8B),
+        backgroundColor: Color(0xff556B2F),
         onPressed: () {
           showDialog(
               context: context,
@@ -389,8 +407,8 @@ class _HabitPageViewState extends State<HabitPageView> {
                       ),
                     ],
                   ),
-                  commonTextField("Title", titleController),
-                  commonTextField("Purpose", purposeController),
+                  commonTextFieldWithCounter("Title", titleController, 25),
+                  commonTextFieldWithCounter("Purpose", purposeController, 25),
                   Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -500,12 +518,12 @@ class _HabitPageViewState extends State<HabitPageView> {
                           Navigator.pop(context);
                           resetForm();
                         },
-                        icon: Icon(Icons.close),
+                        icon: const Icon(Icons.close),
                       ),
                     ],
                   ),
-                  commonTextField("Title", titleController),
-                  commonTextField("Purpose", purposeController),
+                  commonTextFieldWithCounter("Title", titleController, 20),
+                  commonTextFieldWithCounter("Purpose", purposeController, 20),
                   Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -552,25 +570,33 @@ class _HabitPageViewState extends State<HabitPageView> {
     );
   }
 
-  Padding commonTextField(String label, TextEditingController controller) {
+  Padding commonTextFieldWithCounter(
+      String label, TextEditingController controller, int maxLength) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.0),
-              borderSide: BorderSide(color: Colors.blue, width: 2)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.0),
-              borderSide: BorderSide(color: Colors.black, width: 2)),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return '$label cannot be empty'; // Hata mesajını göster
-          }
-          return null;
+      child: ValueListenableBuilder(
+        valueListenable: controller,
+        builder: (context, TextEditingValue value, __) {
+          return TextFormField(
+            controller: controller,
+            inputFormatters: [LengthLimitingTextInputFormatter(maxLength)],
+            decoration: InputDecoration(
+              labelText: label,
+              suffixText: '${value.text.length}/$maxLength',
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                  borderSide: BorderSide(color: Colors.blue, width: 2)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                  borderSide: BorderSide(color: Colors.black, width: 2)),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '$label cannot be empty'; // Hata mesajını göster
+              }
+              return null;
+            },
+          );
         },
       ),
     );
@@ -579,12 +605,10 @@ class _HabitPageViewState extends State<HabitPageView> {
   Future<void> _pickImageFromGallery(String? documentId) async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (image == null) return;
-
     setState(() {
       selectedImage =
           File(image.path); // Seçilen resim setState ile yenileniyor
     });
-
     if (documentId != null) {
       await habitsCollection.doc(documentId).update({
         'imagePath': image.path,

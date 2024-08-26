@@ -68,10 +68,12 @@ class _MainScreenViewState extends State<MainScreenView> {
         }
       }
 
-      setState(() {
-        highStreak = maxStreak;
-        lastUpdatedDate = lastDate;
-      });
+      if (mounted) {
+        setState(() {
+          highStreak = maxStreak;
+          lastUpdatedDate = lastDate;
+        });
+      }
     } catch (e) {
       print("Alışkanlık verilerini çekerken hata: $e");
     }
@@ -80,9 +82,11 @@ class _MainScreenViewState extends State<MainScreenView> {
   // SharedPreferences'tan toplam habit sayısını yükler
   Future<void> _loadTotalHabit() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      totalHabit = prefs.getInt('totalHabit') ?? 0; // Varsayılan olarak 0 al
-    });
+    if (mounted) {
+      setState(() {
+        totalHabit = prefs.getInt('totalHabit') ?? 0; // Varsayılan olarak 0 al
+      });
+    }
   }
 
   Future<void> fetchRandomQuote() async {
@@ -91,9 +95,11 @@ class _MainScreenViewState extends State<MainScreenView> {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      setState(() {
-        quote = data['content'];
-      });
+      if (mounted) {
+        setState(() {
+          quote = data['content'];
+        });
+      }
     } else {
       throw Exception('Failed to load quote');
     }
@@ -109,7 +115,6 @@ class _MainScreenViewState extends State<MainScreenView> {
   @override
   Widget build(BuildContext context) {
     userName = context.watch<UserNameProvider>().getUserName;
-    print("daswd $userName");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -195,7 +200,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                 borderRadius: BorderRadius.circular(16.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Color.fromARGB(31, 252, 2, 2),
+                    color: Color.fromARGB(255, 185, 190, 243),
                     blurRadius: 10,
                     spreadRadius: 5,
                   ),
@@ -228,6 +233,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                     _focusedDay = focusedDay;
                   },
                   calendarStyle: CalendarStyle(
+                    weekendTextStyle: TextStyle(color: Colors.blue),
                     defaultTextStyle: TextStyle(color: Colors.blue),
                     todayTextStyle: TextStyle(color: Colors.white),
                     todayDecoration: BoxDecoration(
@@ -288,7 +294,9 @@ class _MainScreenViewState extends State<MainScreenView> {
             GestureDetector(
               onTap: () async {
                 await Navigator.pushNamed(context, habitPageViewRoute);
-                _refreshData(); // Sayfaya geri dönüldüğünde _loadTotalHabit(),_fetchHabitData() çağırılıyor
+                if (mounted) {
+                  _refreshData(); // Sayfaya geri dönüldüğünde _loadTotalHabit(),_fetchHabitData() çağırılıyor
+                }
               },
               child: Container(
                 height: 220,
@@ -313,7 +321,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                       child: Card(
                         elevation: 10.0,
                         shadowColor:
-                            Color.fromARGB(255, 240, 238, 156).withOpacity(0.5),
+                            Color.fromARGB(255, 253, 252, 253).withOpacity(0.5),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0)),
                         child: Container(
@@ -370,25 +378,57 @@ class _MainScreenViewState extends State<MainScreenView> {
                 itemCount: 3,
                 itemBuilder: (context, index) {
                   String title;
-                  String content;
+                  Widget content; // String yerine Widget kullanılıyor
                   switch (index) {
                     case 0:
-                      title = "En Yüksek Streak";
-                      content = "${highStreak} Gün";
+                      title = "High Streak";
+                      content = Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${highStreak} Gün",
+                            style: GoogleFonts.rubik(
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                              color: Color(0xff4D57C8),
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Icon(
+                            Icons.whatshot,
+                            color: Colors.orange,
+                            size: 20,
+                          ),
+                        ],
+                      );
                       break;
                     case 1:
-                      title = "Toplam Habit Sayısı";
-                      content = "${totalHabit.toString()}";
+                      title = "Total Habit's";
+                      content = Text(
+                        "${totalHabit.toString()}",
+                        style: GoogleFonts.rubik(
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                          color: Color(0xff4D57C8),
+                        ),
+                      );
                       break;
                     case 2:
-                      title = "Son Habit Tarihi";
-                      content = lastUpdatedDate != null
-                          ? DateFormat('dd MMM yyyy').format(lastUpdatedDate!)
-                          : "Güncelleme Yok";
+                      title = "Last updated day";
+                      content = Text(
+                        lastUpdatedDate != null
+                            ? DateFormat('dd MMM yyyy').format(lastUpdatedDate!)
+                            : "No Update",
+                        style: GoogleFonts.rubik(
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                          color: Color(0xff4D57C8),
+                        ),
+                      );
                       break;
                     default:
                       title = "Veri Yok";
-                      content = "";
+                      content = Text("");
                   }
 
                   return Padding(
@@ -399,10 +439,11 @@ class _MainScreenViewState extends State<MainScreenView> {
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Container(
-                        width: 150, // Kartların genişliğini belirleyin
+                        width: 130, // Kartların genişliğini belirleyin
+                        height: 50,
                         decoration: BoxDecoration(
                           color: Color(
-                              0xffF1D3CE), // Arka plan rengi burada ayarlandı
+                              0xffcadbfc), // Arka plan rengi burada ayarlandı
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                         child: Column(
@@ -411,22 +452,15 @@ class _MainScreenViewState extends State<MainScreenView> {
                             Text(
                               title,
                               style: GoogleFonts.rubik(
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xff4D57C8),
                               ),
                             ),
                             SizedBox(
                                 height:
-                                    10), // Başlık ve içerik arasındaki boşluk
-                            Text(
-                              content,
-                              style: GoogleFonts.rubik(
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                                color: Color(0xff4D57C8),
-                              ),
-                            ),
+                                    5), // Başlık ve içerik arasındaki boşluk
+                            content, // İçeriği burada görüntüle
                           ],
                         ),
                       ),
