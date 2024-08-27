@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodplace/constants/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -402,6 +403,8 @@ class _HabitPageViewState extends State<HabitPageView> {
                           Navigator.pop(context);
                           _updateTotalHabit(totalHabit);
                           resetForm();
+                          Navigator.pushNamed(
+                              context, createHabitPageViewRoute);
                         },
                         icon: Icon(Icons.close),
                       ),
