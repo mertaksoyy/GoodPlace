@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/firebase_options.dart';
 import 'package:goodplace/username_provider.dart';
-import 'package:goodplace/views/create_habit_page_view.dart';
+import 'package:goodplace/views/chatbot_page_view.dart';
 import 'package:goodplace/views/habit_page_view.dart';
 import 'package:goodplace/views/main_screen_view.dart';
 import 'package:goodplace/views/onboarding_view.dart';
@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
           mainPageRoute: (context) => MainScreenView(),
           onBoardViewRoute: (context) => const OnBoardPage(),
           habitPageViewRoute: (context) => HabitPageView(),
-          createHabitPageViewRoute: (context) => CreateHabitPageView(),
+          chatBotViewRoute: (context) => ChatbotScreenView(),
         },
       ),
     );

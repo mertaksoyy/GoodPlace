@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/habit.dart';
 import 'package:goodplace/username_provider.dart';
@@ -527,6 +529,23 @@ class _MainScreenViewState extends State<MainScreenView> {
               ),
             )
           ],
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 60,
+        height: 60,
+        child: FloatingActionButton(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+          backgroundColor: Color(0xff8E97FD),
+          onPressed: () {
+            Navigator.pushNamed(context, chatBotViewRoute);
+          },
+          child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Image.asset(
+                  'assets/images/robot.png') //SvgPicture.asset('assets/icon/icon.png'),
+              ),
         ),
       ),
     );

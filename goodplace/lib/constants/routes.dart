@@ -6,4 +6,4 @@ const mainPageRoute = '/main-page';
 const onBoardViewRoute = '/onboard';
 const habitPageViewRoute = '/habitpage';
 
-const createHabitPageViewRoute = '/createhabit';
+const chatBotViewRoute = '/chatbot';

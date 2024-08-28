@@ -403,8 +403,6 @@ class _HabitPageViewState extends State<HabitPageView> {
                           Navigator.pop(context);
                           _updateTotalHabit(totalHabit);
                           resetForm();
-                          Navigator.pushNamed(
-                              context, createHabitPageViewRoute);
                         },
                         icon: Icon(Icons.close),
                       ),
