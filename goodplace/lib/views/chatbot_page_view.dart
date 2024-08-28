@@ -32,7 +32,7 @@ class _ChatbotScreenViewState extends State<ChatbotScreenView> {
     final response = await http.post(
       url,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=UTF-8', // Charset eklendi
         'api-key': openAiApiKey,
       },
       body: jsonEncode({
@@ -40,17 +40,17 @@ class _ChatbotScreenViewState extends State<ChatbotScreenView> {
           {'role': 'system', 'content': getSystemMessage()},
           {'role': 'user', 'content': message}
         ],
-        'max_tokens':
-            150, // Cevabın uzunluğunu artırmak için token sayısını artırdık
+        'max_tokens': 150,
         'temperature': 0.7,
       }),
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final decodedResponse =
+          utf8.decode(response.bodyBytes); // UTF-8 olarak çözümleme
+      final data = jsonDecode(decodedResponse); // JSON çözümleme
       final purpose = data['choices'][0]['message']['content'].trim();
 
-      // Cevabı kontrol et ve amacından farklı bir şey sorulduysa uygun mesaj göster
       if ((selectedLanguage == 'en' &&
               (purpose.toLowerCase().contains("i don't know") ||
                   purpose.toLowerCase().contains("this topic"))) ||
@@ -102,7 +102,7 @@ class _ChatbotScreenViewState extends State<ChatbotScreenView> {
             ),
             Text(
               "GoodPlaceT",
-              style: GoogleFonts.rubik(
+              style: GoogleFonts.lato(
                   color: Colors.white,
                   fontStyle: FontStyle.italic,
                   fontSize: 25),
@@ -196,23 +196,5 @@ class _ChatbotScreenViewState extends State<ChatbotScreenView> {
         ),
       ),
     );
-  }
-}
-
-class OvalBottomBorderClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(0, size.height - 20);
-    path.quadraticBezierTo(
-        size.width / 2, size.height, size.width, size.height - 20);
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return false;
   }
 }
