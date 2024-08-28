@@ -152,26 +152,30 @@ class _MainScreenViewState extends State<MainScreenView> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color(0xff8E97FD),
-              ),
-              child: Text(
-                'Menu',
-                style: GoogleFonts.rubik(
-                    fontSize: 25,
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xffFFECCC)),
+            SizedBox(
+              height: 128,
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Color(0xff8E97FD),
+                ),
+                child: Text(
+                  'Menu',
+                  style: GoogleFonts.rubik(
+                      fontSize: 25,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xffFFECCC)),
+                ),
               ),
             ),
             Padding(
               padding: EdgeInsets.all(8),
               child: Card(
                 child: ListTile(
-                  title: const Text('Home Screen'),
+                  title: const Text('My Habits'),
                   onTap: () {
-                    Navigator.of(context).pop();
+                    Navigator.pop(context);
+                    Navigator.of(context).pushNamed(myHabitsViewRoute);
                   },
                   trailing: Icon(Icons.home),
                 ),
@@ -256,7 +260,6 @@ class _MainScreenViewState extends State<MainScreenView> {
                   calendarStyle: CalendarStyle(
                     weekendTextStyle: TextStyle(color: Colors.blue),
                     defaultTextStyle: TextStyle(color: Colors.blue),
-                    weekendTextStyle: TextStyle(color: Colors.blue),
                     todayTextStyle: TextStyle(color: Colors.white),
                     todayDecoration: BoxDecoration(
                       color: Colors.blue,
@@ -418,7 +421,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                           },
                           leading: Icon(
                             Icons.star,
-                            color: Colors.yellow,
+                            color: Color.fromARGB(255, 245, 154, 17),
                           ),
                           title: Text(snapshot.data![index].title),
                           trailing: Text(snapshot.data![index].formattedDate),
@@ -501,7 +504,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                         height: 50,
                         decoration: BoxDecoration(
                           color: Color(
-                              0xffcadbfc), // Arka plan rengi burada ayarlandı
+                              0xffE6E6FA), // Arka plan rengi burada ayarlandı
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                         child: Column(

@@ -91,13 +91,8 @@ class _SignInViewState extends State<SignInView> {
                           width: 300, // Genişliği artırdım
                           height: 60, // Yüksekliği artırdım
                           child: ElevatedButton(
-                            onPressed: () {
-                              signInWithGoogle();
-                              showOnboarding
-                                  ? Navigator.of(context)
-                                      .pushNamed(onBoardViewRoute)
-                                  : Navigator.of(context)
-                                      .pushNamed(mainPageRoute);
+                            onPressed: () async {
+                              await signInWithGoogle();
                             },
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(
@@ -279,7 +274,12 @@ class _SignInViewState extends State<SignInView> {
 
   signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) return;
+    if (googleUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In işlemi iptal edildi')),
+      );
+      return;
+    }
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
@@ -289,6 +289,9 @@ class _SignInViewState extends State<SignInView> {
     userName = googleUser.displayName!;
     print('username is $userName');
     context.read<UserNameProvider>().setUserName(userName);
+    showOnboarding
+        ? Navigator.of(context).pushNamed(onBoardViewRoute)
+        : Navigator.of(context).pushNamed(mainPageRoute);
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 }

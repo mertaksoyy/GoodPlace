@@ -6,6 +6,7 @@ import 'package:goodplace/firebase_options.dart';
 import 'package:goodplace/username_provider.dart';
 import 'package:goodplace/views/habit_page_view.dart';
 import 'package:goodplace/views/main_screen_view.dart';
+import 'package:goodplace/views/my_habits.dart';
 import 'package:goodplace/views/onboarding_view.dart';
 import 'package:goodplace/views/sign_in_view.dart';
 import 'package:goodplace/views/sign_up.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
           mainPageRoute: (context) => MainScreenView(),
           onBoardViewRoute: (context) => const OnBoardPage(),
           habitPageViewRoute: (context) => HabitPageView(),
+          myHabitsViewRoute: (context) => MyHabits(),
         },
       ),
     );
