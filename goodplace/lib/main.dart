@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/firebase_options.dart';
+import 'package:goodplace/service/notification_service.dart';
 import 'package:goodplace/username_provider.dart';
 import 'package:goodplace/views/chatbot_page_view.dart';
 import 'package:goodplace/views/habit_page_view.dart';
@@ -18,6 +21,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());
+  NotificationService().setupFirebaseMessaging();
 }
 
 class MyApp extends StatelessWidget {
@@ -65,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     loadPrefs();
+    saveTokenToDatabase();
   }
 
   // Veriyi yükledikten sonra UserNameProvider'ı güncelleyin
@@ -109,5 +114,24 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
     );
+  }
+}
+
+Future<void> saveTokenToDatabase() async {
+  // Firebase Messaging instance al
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // FCM token'ı al
+  String? token = await messaging.getToken();
+
+  // Kullanıcı kimliği al (Kullanıcı giriş yaptıktan sonra mevcut olmalıdır)
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null && token != null) {
+    String userId = user.uid;
+
+    // Firestore'da kullanıcı belgesini güncelle veya oluştur
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      'fcmToken': token,
+    }, SetOptions(merge: true));
   }
 }

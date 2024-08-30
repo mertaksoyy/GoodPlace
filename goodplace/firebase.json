@@ -1,1 +1,38 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"goodplace-firebase","appId":"1:881426385912:android:0387c52841151e2733240d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"goodplace-firebase","configurations":{"android":"1:881426385912:android:0387c52841151e2733240d","ios":"1:881426385912:ios:fe7e33dfe37767ad33240d"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "goodplace-firebase",
+          "appId": "1:881426385912:android:0387c52841151e2733240d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "goodplace-firebase",
+          "configurations": {
+            "android": "1:881426385912:android:0387c52841151e2733240d",
+            "ios": "1:881426385912:ios:fe7e33dfe37767ad33240d"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}
