@@ -1,25 +1,22 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
+import 'package:goodplace/services/ai_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
-class HabitPageView extends StatefulWidget {
-  const HabitPageView({super.key});
+class CreateHabit extends StatefulWidget {
+  const CreateHabit({super.key});
 
   @override
-  State<HabitPageView> createState() => _HabitPageViewState();
+  State<CreateHabit> createState() => _CreateHabitState();
 }
 
-class _HabitPageViewState extends State<HabitPageView> {
-  final _formKey = GlobalKey<FormState>(); // Form durumu için GlobalKey
+class _CreateHabitState extends State<CreateHabit> {
   TextEditingController titleController = TextEditingController();
   TextEditingController purposeController = TextEditingController();
   String todayDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
@@ -64,143 +61,22 @@ class _HabitPageViewState extends State<HabitPageView> {
     }); // Uygulama başladığında totalHabit'i yükle
   }
 
-  // Azure OpenAI API'sine title göndererek purpose oluşturma fonksiyonu
-  Future<String> generatePurpose(String title) async {
-    final url = Uri.parse(
-        'https://patrons-openai.openai.azure.com/openai/deployments/GrowTogether/chat/completions?api-version=2024-02-15-preview');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': openAiApiKey,
-      },
-      body: jsonEncode({
-        'messages': [
-          {
-            'role': 'system',
-            'content':
-                'You are a helpful assistant that generates short purposes for habits.'
-          },
-          {
-            'role': 'user',
-            'content':
-                'Write a short purpose for the habit titled "$title". Purpose should be concise and under 25 characters.'
-          }
-        ],
-        'max_tokens': 25,
-        'temperature': 0.7,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final purpose = data['choices'][0]['message']['content'].trim();
-      return purpose;
-    } else {
-      throw Exception('Failed to generate purpose');
-    }
-  }
-
-  Future<void> _loadTotalHabit() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      totalHabit = prefs.getInt('totalHabit') ?? 0; // Eğer yoksa 0 olarak al
-    });
-  }
-
-  Future<void> _updateTotalHabit(int newValue) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      totalHabit = newValue;
-      prefs.setInt('totalHabit', totalHabit); // totalHabit'i sakla
-    });
-  }
-
   Future<void> storeData() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      try {
-        String title = titleController.text;
-        String purpose = purposeController
-            .text; // Kullanıcı ya da AI tarafından oluşturulmuş purpose
-
-        // Yeni bir habit eklerken veritabanına yazma işlemi
-        await habitsCollection.add({
-          'title': title,
-          'purpose': purpose,
-          'streakCount': streakCount,
-          'lastUpdatedDate': null,
-          'imagePath': selectedImage != null
-              ? selectedImage!.path
-              : null, // Store image path
-          'userId': currentUser?.uid, // Oturum açmış kullanıcının UID'sini ekle
-        });
-
-        // Veritabanına başarılı bir şekilde yazıldıktan sonra totalHabit'i artır
-        await _updateTotalHabit(totalHabit + 1);
-
-        // Verileri kaydettikten sonra formu resetle ve dialog'u kapat
-        resetForm();
-        Navigator.pop(context);
-      } catch (e) {
-        print("Error saving data: $e");
-      }
-    }
-  }
-
-  Future<void> updateData(DocumentSnapshot document) async {
-    if (_formKey.currentState?.validate() ?? false) {
-      try {
-        String title = titleController.text;
-        String purpose = purposeController.text;
-        int currentStreakCount = document['streakCount'];
-        DateTime? lastUpdatedDate = (document['lastUpdatedDate'] != null)
-            ? (document['lastUpdatedDate'] as Timestamp).toDate()
-            : null;
-        DateTime today = DateTime.now();
-
-        // Eğer streakCount bugün zaten artırılmışsa artırma
-        if (lastUpdatedDate == null ||
-            lastUpdatedDate.day != today.day ||
-            lastUpdatedDate.month != today.month ||
-            lastUpdatedDate.year != today.year) {
-          currentStreakCount += 1;
-
-          await habitsCollection.doc(document.id).update({
-            'streakCount': currentStreakCount,
-            'lastUpdatedDate': today,
-          });
-        }
-
-        // Streak count artırılsın veya artırılmasın title ve purpose'ı güncelle
-        await habitsCollection.doc(document.id).update({
-          'title': title,
-          'purpose': purpose,
-        });
-
-        Navigator.pop(context); // Verileri güncelledikten sonra dialog'u kapat
-      } catch (e) {
-        print("Error updating data: $e");
-      }
-    }
-  }
-
-  Future<void> deleteHabit(DocumentSnapshot document) async {
     try {
-      await habitsCollection.doc(document.id).delete();
-      _updateTotalHabit(totalHabit - 1); // Habit silindiğinde azalt
+      String title = titleController.text;
+      String purpose = purposeController.text;
+      await habitsCollection.add({
+        'title': title,
+        'purpose': purpose,
+        'streakCount': 0,
+        'lastUpdatedDate': null,
+        'imagePath': selectedImage != null ? selectedImage!.path : imageUrl,
+        'userId': currentUser?.uid, // Oturum açmış kullanıcının UID'sini ekle
+      });
+      Navigator.pop(context);
     } catch (e) {
-      print("Error deleting data: $e");
+      print("Error saving data: $e");
     }
-  }
-
-  void resetForm() {
-    setState(() {
-      titleController.clear();
-      purposeController.clear();
-      streakCount = 0;
-      _controller.text = streakCount.toString();
-    });
   }
 
   @override
@@ -216,13 +92,6 @@ class _HabitPageViewState extends State<HabitPageView> {
       selectedImage =
           File(image.path); // Seçilen resim setState ile yenileniyor
     });
-    /*
-    if (documentId != null) {
-      await habitsCollection.doc(documentId).update({
-        'imagePath': image.path,
-      });
-    }
-    */
   }
 
   @override
@@ -256,9 +125,6 @@ class _HabitPageViewState extends State<HabitPageView> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No habits found"));
-            }
             return Scaffold(
                 // ignore: prefer_const_constructors
                 body: SingleChildScrollView(
@@ -287,7 +153,10 @@ class _HabitPageViewState extends State<HabitPageView> {
                     controller: titleController,
                     decoration: InputDecoration(
                       suffixIcon: IconButton(
-                        onPressed: titleController.clear,
+                        onPressed: () {
+                          titleController.clear();
+                          purposeController.clear();
+                        },
                         icon: const Icon(Icons.clear),
                       ),
                       labelText: 'Enter a Habit Title',
@@ -378,7 +247,7 @@ class _HabitPageViewState extends State<HabitPageView> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.greenAccent,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (titleController.text.isEmpty) {
                         setState(() {});
                         titleError = true;
@@ -387,8 +256,9 @@ class _HabitPageViewState extends State<HabitPageView> {
                           purposeError = true;
                         });
                       } else {
-                        Navigator.of(context)
-                            .popAndPushNamed(myHabitsViewRoute);
+                        await storeData();
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            myHabitsViewRoute, (Route<dynamic> route) => false);
                       }
                     },
                     child: const Center(child: Text('Create Habit')),
