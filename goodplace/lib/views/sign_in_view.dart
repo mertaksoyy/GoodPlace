@@ -82,7 +82,6 @@ class _SignInViewState extends State<SignInView> {
                         left: 0,
                         child: Image.asset(
                           'assets/images/signupdesign.png',
-<<<<<<< HEAD
                           color: // Color(0xffFAF8F5)
                               const Color.fromARGB(255, 240, 239, 237),
                         )),
@@ -103,33 +102,6 @@ class _SignInViewState extends State<SignInView> {
                                   horizontal: 20, vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
-=======
-                          color: const Color.fromARGB(255, 240, 239, 237),
-                        ),
-                      ),
-                      Positioned(
-                        top: 260,
-                        left: 45,
-                        child: Center(
-                          child: SizedBox(
-                            width: 300,
-                            height: 60,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                signInWithGoogle();
-                                showOnboarding
-                                    ? Navigator.of(context)
-                                        .pushNamed(onBoardViewRoute)
-                                    : Navigator.of(context)
-                                        .pushNamed(mainPageRoute);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
->>>>>>> 6cf9bf0981c158437f7d99f1726c09d1ba8d5125
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
