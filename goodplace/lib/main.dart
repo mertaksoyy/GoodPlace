@@ -4,12 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/firebase_options.dart';
 import 'package:goodplace/username_provider.dart';
-<<<<<<< HEAD
 import 'package:goodplace/views/create_habit.dart';
-=======
 import 'package:goodplace/views/chatbot_page_view.dart';
-import 'package:goodplace/views/habit_page_view.dart';
->>>>>>> 6cf9bf0981c158437f7d99f1726c09d1ba8d5125
 import 'package:goodplace/views/main_screen_view.dart';
 import 'package:goodplace/views/my_habits.dart';
 import 'package:goodplace/views/onboarding_view.dart';
@@ -49,14 +45,11 @@ class MyApp extends StatelessWidget {
           welcomePageRoute: (context) => const WelcomePage(),
           mainPageRoute: (context) => MainScreenView(),
           onBoardViewRoute: (context) => const OnBoardPage(),
-<<<<<<< HEAD
           createHabitViewRoute: (context) => CreateHabit(),
           myHabitsViewRoute: (context) => MyHabits(),
           updateHabitViewRoute: (context) => UpdateHabit(),
-=======
-          habitPageViewRoute: (context) => HabitPageView(),
           chatBotViewRoute: (context) => ChatbotScreenView(),
->>>>>>> 6cf9bf0981c158437f7d99f1726c09d1ba8d5125
+
         },
       ),
     );
