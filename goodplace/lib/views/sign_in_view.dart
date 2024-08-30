@@ -95,11 +95,6 @@ class _SignInViewState extends State<SignInView> {
                             child: ElevatedButton(
                               onPressed: () {
                                 signInWithGoogle();
-                                showOnboarding
-                                    ? Navigator.of(context)
-                                        .pushNamed(onBoardViewRoute)
-                                    : Navigator.of(context)
-                                        .pushNamed(mainPageRoute);
                               },
                               style: ElevatedButton.styleFrom(
                                 padding: EdgeInsets.symmetric(
@@ -304,6 +299,9 @@ class _SignInViewState extends State<SignInView> {
     userName = googleUser.displayName!;
     print('username is $userName');
     context.read<UserNameProvider>().setUserName(userName);
+    showOnboarding
+        ? Navigator.of(context).pushNamed(onBoardViewRoute)
+        : Navigator.of(context).pushNamed(mainPageRoute);
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
