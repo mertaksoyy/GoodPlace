@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/habit.dart';
 import 'package:goodplace/username_provider.dart';
@@ -492,6 +494,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                     shrinkWrap: true,
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
+<<<<<<< HEAD
                       final habit = snapshot.data![index];
                       return Stack(alignment: Alignment.center, children: [
                         Card(
@@ -532,6 +535,17 @@ class _MainScreenViewState extends State<MainScreenView> {
                                 ),
                               ],
                             ),
+=======
+                      return Card(
+                        color: Color(0xffE6E6FA),
+                        child: ListTile(
+                          onTap: () {
+                            //
+                          },
+                          leading: Icon(
+                            Icons.star,
+                            color: const Color.fromARGB(255, 255, 177, 59),
+>>>>>>> 6cf9bf0981c158437f7d99f1726c09d1ba8d5125
                           ),
                         ),
                         ConfettiWidget(
@@ -559,7 +573,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "${highStreak} Gün",
+                            "${highStreak} day",
                             style: GoogleFonts.rubik(
                               fontSize: 14,
                               fontWeight: FontWeight.normal,
@@ -643,6 +657,23 @@ class _MainScreenViewState extends State<MainScreenView> {
               ),
             )
           ],
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 60,
+        height: 60,
+        child: FloatingActionButton(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+          backgroundColor: Color(0xff8E97FD),
+          onPressed: () {
+            Navigator.pushNamed(context, chatBotViewRoute);
+          },
+          child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Image.asset(
+                  'assets/images/robot.png') //SvgPicture.asset('assets/icon/icon.png'),
+              ),
         ),
       ),
     );
