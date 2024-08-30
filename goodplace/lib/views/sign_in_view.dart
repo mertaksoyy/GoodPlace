@@ -82,26 +82,31 @@ class _SignInViewState extends State<SignInView> {
                         left: 0,
                         child: Image.asset(
                           'assets/images/signupdesign.png',
-                          color: // Color(0xffFAF8F5)
-                              const Color.fromARGB(255, 240, 239, 237),
-                        )),
-                    Positioned(
-                      top: 260,
-                      left:
-                          45, // Butonu biraz daha ortalamak için left değerini değiştirdim
-                      child: Center(
-                        child: SizedBox(
-                          width: 300, // Genişliği artırdım
-                          height: 60, // Yüksekliği artırdım
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await signInWithGoogle();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                          color: const Color.fromARGB(255, 240, 239, 237),
+                        ),
+                      ),
+                      Positioned(
+                        top: 260,
+                        left: 45,
+                        child: Center(
+                          child: SizedBox(
+                            width: 300,
+                            height: 60,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                signInWithGoogle();
+                                showOnboarding
+                                    ? Navigator.of(context)
+                                        .pushNamed(onBoardViewRoute)
+                                    : Navigator.of(context)
+                                        .pushNamed(mainPageRoute);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -289,12 +294,7 @@ class _SignInViewState extends State<SignInView> {
 
   signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In işlemi iptal edildi')),
-      );
-      return;
-    }
+    if (googleUser == null) return;
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
@@ -304,9 +304,6 @@ class _SignInViewState extends State<SignInView> {
     userName = googleUser.displayName!;
     print('username is $userName');
     context.read<UserNameProvider>().setUserName(userName);
-    showOnboarding
-        ? Navigator.of(context).pushNamed(onBoardViewRoute)
-        : Navigator.of(context).pushNamed(mainPageRoute);
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
