@@ -494,7 +494,6 @@ class _MainScreenViewState extends State<MainScreenView> {
                     shrinkWrap: true,
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
-<<<<<<< HEAD
                       final habit = snapshot.data![index];
                       return Stack(alignment: Alignment.center, children: [
                         Card(
@@ -535,17 +534,6 @@ class _MainScreenViewState extends State<MainScreenView> {
                                 ),
                               ],
                             ),
-=======
-                      return Card(
-                        color: Color(0xffE6E6FA),
-                        child: ListTile(
-                          onTap: () {
-                            //
-                          },
-                          leading: Icon(
-                            Icons.star,
-                            color: const Color.fromARGB(255, 255, 177, 59),
->>>>>>> 6cf9bf0981c158437f7d99f1726c09d1ba8d5125
                           ),
                         ),
                         ConfettiWidget(
