@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/habit.dart';
 import 'package:goodplace/username_provider.dart';
@@ -256,7 +258,6 @@ class _MainScreenViewState extends State<MainScreenView> {
                   calendarStyle: CalendarStyle(
                     weekendTextStyle: TextStyle(color: Colors.blue),
                     defaultTextStyle: TextStyle(color: Colors.blue),
-                    weekendTextStyle: TextStyle(color: Colors.blue),
                     todayTextStyle: TextStyle(color: Colors.white),
                     todayDecoration: BoxDecoration(
                       color: Colors.blue,
@@ -418,7 +419,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                           },
                           leading: Icon(
                             Icons.star,
-                            color: Colors.yellow,
+                            color: const Color.fromARGB(255, 255, 177, 59),
                           ),
                           title: Text(snapshot.data![index].title),
                           trailing: Text(snapshot.data![index].formattedDate),
@@ -444,7 +445,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "${highStreak} Gün",
+                            "${highStreak} day",
                             style: GoogleFonts.rubik(
                               fontSize: 14,
                               fontWeight: FontWeight.normal,
@@ -501,7 +502,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                         height: 50,
                         decoration: BoxDecoration(
                           color: Color(
-                              0xffcadbfc), // Arka plan rengi burada ayarlandı
+                              0xffE6E6FA), // Arka plan rengi burada ayarlandı
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                         child: Column(
@@ -528,6 +529,23 @@ class _MainScreenViewState extends State<MainScreenView> {
               ),
             )
           ],
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 60,
+        height: 60,
+        child: FloatingActionButton(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+          backgroundColor: Color(0xff8E97FD),
+          onPressed: () {
+            Navigator.pushNamed(context, chatBotViewRoute);
+          },
+          child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Image.asset(
+                  'assets/images/robot.png') //SvgPicture.asset('assets/icon/icon.png'),
+              ),
         ),
       ),
     );
