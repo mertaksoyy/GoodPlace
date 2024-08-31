@@ -43,7 +43,7 @@ class _MainScreenViewState extends State<MainScreenView> {
 
   @override
   void initState() {
-    _myConfetti = ConfettiController(duration: const Duration(seconds: 3));
+    _myConfetti = ConfettiController();
     super.initState();
   }
 
@@ -57,11 +57,25 @@ class _MainScreenViewState extends State<MainScreenView> {
     await _fetchHabitData();
   }
 
+/*
   Stream<List<Habit>> habitStream() {
     final user = FirebaseAuth.instance.currentUser;
     return FirebaseFirestore.instance
         .collection('habits')
         .where('userId', isEqualTo: user?.uid)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => Habit.fromFirestore(doc)).toList();
+    });
+  }
+  */
+  Stream<List<Habit>> habitStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    return FirebaseFirestore.instance
+        .collection('habits')
+        .where('userId', isEqualTo: user?.uid)
+        .orderBy('highStreakCount', descending: true)
+        .limit(5) // En yüksek 5 habit getir
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => Habit.fromFirestore(doc)).toList();
@@ -283,7 +297,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                     defaultTextStyle: TextStyle(color: Colors.blue),
                     todayTextStyle: TextStyle(color: Colors.white),
                     todayDecoration: BoxDecoration(
-                      color: Colors.transparent, // Bugün dekorasyonunu kaldır
+                      color: Colors.blue,
                       shape: BoxShape.circle,
                     ),
                     selectedTextStyle: TextStyle(color: Colors.white),
@@ -292,70 +306,9 @@ class _MainScreenViewState extends State<MainScreenView> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  headerStyle: const HeaderStyle(
+                  headerStyle: HeaderStyle(
                     formatButtonVisible: false,
                     titleCentered: true,
-                  ),
-                  calendarBuilders: CalendarBuilders(
-                    defaultBuilder: (context, day, focusedDay) {
-                      // Belirtilen tarih aralığındaysa yeşil renkte göster
-                      if ((day.isAtSameMomentAs(_startDate) ||
-                          day.isAtSameMomentAs(_endDate) ||
-                          (day.isAfter(_startDate) &&
-                              day.isBefore(_endDate)))) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors
-                                .green, // Belirlenen aralıktaki günler için yeşil renk
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${day.day}',
-                              style:
-                                  TextStyle(color: Colors.white), // Metin rengi
-                            ),
-                          ),
-                        );
-                      }
-                      return null; // Diğer günler için varsayılan ayarlamayı döndür
-                    },
-                    todayBuilder: (context, day, focusedDay) {
-                      // Eğer bugün belirtilen aralıktaysa, yeşil renkte göster
-                      if ((day.isAtSameMomentAs(_startDate) ||
-                          day.isAtSameMomentAs(_endDate) ||
-                          (day.isAfter(_startDate) &&
-                              day.isBefore(_endDate)))) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color:
-                                Colors.green, // Bugün aralıkta ise yeşil renk
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${day.day}',
-                              style:
-                                  TextStyle(color: Colors.white), // Metin rengi
-                            ),
-                          ),
-                        );
-                      }
-                      // Eğer bugün aralıkta değilse, normal 'today' dekorasyonu uygulanır
-                      return Container(
-                        decoration: BoxDecoration(
-                          color:
-                              Colors.blue, // Bugün aralıkta değilse mavi renk
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      );
-                    },
                   ),
                 ),
               ),
@@ -397,6 +350,143 @@ class _MainScreenViewState extends State<MainScreenView> {
                   ),
                 ),
               ),
+            ),
+            StreamBuilder<List<Habit>>(
+              stream: habitStream(), // Verileri dinleyen stream fonksiyonu
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No habits found.'));
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                          bottomLeft: Radius.circular(15),
+                          bottomRight: Radius.circular(15),
+                        ),
+                        color: Color(0xff8E97FD),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  'Show All Habits',
+                                  style: TextStyle(
+                                      color: Color(0xffFFECCC),
+                                      fontSize: 18,
+                                      fontStyle: FontStyle.italic),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pushNamed(myHabitsViewRoute);
+                                },
+                                icon: Icon(Icons.arrow_forward),
+                                color: Color(0xffFFECCC),
+                              ),
+                            ],
+                          ),
+                          Divider(
+                            thickness: 4,
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context, index) {
+                              final habit = snapshot.data![index];
+                              return Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    SizedBox(
+                                      height: 100,
+                                      child: Card(
+                                        color: Color(0xffE6E6FA),
+                                        child: Stack(children: [
+                                          Positioned.fill(
+                                            child: Image.network(
+                                              habit.imagePath,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                          ListTile(
+                                            onTap: () {
+                                              _selectedDay = habit.startDate;
+                                              _focusedDay = habit.startDate;
+                                              setState(() {});
+                                            },
+                                            leading: Icon(
+                                              Icons.star,
+                                              color: Color.fromARGB(
+                                                  255, 245, 154, 17),
+                                            ),
+                                            title: Text(
+                                                snapshot.data![index].title),
+                                            trailing: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Visibility(
+                                                  visible:
+                                                      !habit.isStreakIncrement,
+                                                  child: ElevatedButton.icon(
+                                                    icon: const Icon(
+                                                        Icons.access_time),
+                                                    onPressed: () async {
+                                                      habit
+                                                          .incrementStreakIfValid();
+                                                      _myConfetti.play();
+                                                      await Future.delayed(
+                                                          const Duration(
+                                                              seconds: 1));
+                                                      _myConfetti.stop();
+                                                      setState(() {});
+                                                      await _updateHabitInFirestore(
+                                                          habit);
+                                                    },
+                                                    label: Text('I did!'),
+                                                  ),
+                                                ),
+                                                const Icon(
+                                                  Icons.whatshot,
+                                                  color: Colors.orange,
+                                                ),
+                                                Text(
+                                                  snapshot.data![index]
+                                                      .highStreakCount
+                                                      .toString(),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ]),
+                                      ),
+                                    ),
+                                    ConfettiWidget(
+                                      confettiController: _myConfetti,
+                                      blastDirection: -pi / 2,
+                                    )
+                                  ]);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
             GestureDetector(
               onTap: () async {
@@ -464,7 +554,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                               color: Colors.black,
                             ),
                             Text(
-                              "Or track your habit!",
+                              "To start building a better routine today!",
                               style: GoogleFonts.rubik(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -478,72 +568,6 @@ class _MainScreenViewState extends State<MainScreenView> {
                   ],
                 ),
               ),
-            ),
-            StreamBuilder<List<Habit>>(
-              stream: habitStream(), // Verileri dinleyen stream fonksiyonu
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No habits found.'));
-                } else {
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final habit = snapshot.data![index];
-                      return Stack(alignment: Alignment.center, children: [
-                        Card(
-                          color: Color(0xffE6E6FA),
-                          child: ListTile(
-                            onTap: () {},
-                            leading: Icon(
-                              Icons.star,
-                              color: Color.fromARGB(255, 245, 154, 17),
-                            ),
-                            title: Text(snapshot.data![index].title),
-                            trailing: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Visibility(
-                                  visible: !habit.isStreakIncrement,
-                                  child: ElevatedButton.icon(
-                                    icon: const Icon(Icons.access_time),
-                                    onPressed: () async {
-                                      _myConfetti.play();
-                                      await Future.delayed(
-                                          const Duration(seconds: 3));
-                                      _myConfetti.stop();
-                                      setState(() {});
-                                      habit.incrementStreakIfValid();
-                                      await _updateHabitInFirestore(habit);
-                                    },
-                                    label: Text('I did!'),
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.whatshot,
-                                  color: Colors.orange,
-                                ),
-                                Text(
-                                  snapshot.data![index].streakCount.toString(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        ConfettiWidget(
-                          confettiController: _myConfetti,
-                          blastDirection: -pi / 2,
-                        )
-                      ]);
-                    },
-                  );
-                }
-              },
             ),
             Container(
               height: 160,
@@ -564,7 +588,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                             style: GoogleFonts.rubik(
                               fontSize: 14,
                               fontWeight: FontWeight.normal,
-                              color: Color(0xff4D57C8),
+                              color: Color(0xffFFECCC),
                             ),
                           ),
                           SizedBox(width: 5),
@@ -583,7 +607,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                         style: GoogleFonts.rubik(
                           fontSize: 14,
                           fontWeight: FontWeight.normal,
-                          color: Color(0xff4D57C8),
+                          color: Color(0xffFFECCC),
                         ),
                       );
                       break;
@@ -596,7 +620,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                         style: GoogleFonts.rubik(
                           fontSize: 14,
                           fontWeight: FontWeight.normal,
-                          color: Color(0xff4D57C8),
+                          color: Color(0xffFFECCC),
                         ),
                       );
                       break;
@@ -617,7 +641,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                         height: 50,
                         decoration: BoxDecoration(
                           color: Color(
-                              0xffE6E6FA), // Arka plan rengi burada ayarlandı
+                              0xff8E97FD), // Arka plan rengi burada ayarlandı
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                         child: Column(
@@ -628,7 +652,8 @@ class _MainScreenViewState extends State<MainScreenView> {
                               style: GoogleFonts.rubik(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xff4D57C8),
+                                color: Color(
+                                    0xffFFECCC), // Title rengi güncellendi
                               ),
                             ),
                             SizedBox(

@@ -6,6 +6,7 @@ class Habit {
   final String title;
   final String purpose;
   final String imagePath;
+  final DateTime startDate; // Yeni alan eklendi
   DateTime lastUpdatedDate;
   int streakCount;
   int highStreakCount;
@@ -16,6 +17,7 @@ class Habit {
     required this.title,
     required this.purpose,
     required this.imagePath,
+    required this.startDate, // Yeni alan
     required this.lastUpdatedDate,
     required this.streakCount,
     this.highStreakCount = 0,
@@ -29,6 +31,8 @@ class Habit {
       title: data['title'],
       imagePath: data['imagePath'],
       purpose: data['purpose'],
+      startDate: (data['startDate'] as Timestamp?)?.toDate() ??
+          DateTime.now(), // Yeni alan
       streakCount: data['streakCount'],
       lastUpdatedDate:
           (data['lastUpdatedDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
