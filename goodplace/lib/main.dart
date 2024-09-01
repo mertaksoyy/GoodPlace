@@ -49,7 +49,6 @@ class MyApp extends StatelessWidget {
           myHabitsViewRoute: (context) => MyHabits(),
           updateHabitViewRoute: (context) => UpdateHabit(),
           chatBotViewRoute: (context) => ChatbotScreenView(),
-
         },
       ),
     );
