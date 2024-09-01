@@ -230,12 +230,20 @@ class _UpdateHabitState extends State<UpdateHabit> {
                       purposeError = true;
                     });
                   } else {
-                    await uploadFile();
-                    await habitsCollection.doc(habit.id).update({
-                      'title': titleController.text,
-                      'purpose': purposeController.text,
-                      'imagePath': imageUrl,
-                    });
+                    if (pickedFile != null) {
+                      await uploadFile();
+                      await habitsCollection.doc(habit.id).update({
+                        'title': titleController.text,
+                        'purpose': purposeController.text,
+                        'imagePath': imageUrl,
+                      });
+                    } else {
+                      await habitsCollection.doc(habit.id).update({
+                        'title': titleController.text,
+                        'purpose': purposeController.text,
+                      });
+                    }
+
                     Navigator.of(context)
                         .pushReplacementNamed(myHabitsViewRoute);
                   }
