@@ -84,15 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       showOnboarding = prefs.getBool('res') ?? true;
     });
-
-    /*
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userNameProvider =
-          Provider.of<UserNameProvider>(context, listen: false);
-      final name = FirebaseAuth.instance.currentUser!.displayName;
-      userNameProvider.setUserName(name!); // Örnek veri
-    });
-    */
   }
 
   @override

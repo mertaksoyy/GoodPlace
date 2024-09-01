@@ -1,10 +1,8 @@
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/habit.dart';
 import 'package:goodplace/username_provider.dart';
@@ -12,7 +10,6 @@ import 'package:goodplace/utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -38,9 +35,6 @@ class _MainScreenViewState extends State<MainScreenView> {
   List<String> habitTitles = [];
   late ConfettiController _myConfetti;
 
-  DateTime _startDate = DateTime(2024, 8, 30);
-  DateTime _endDate = DateTime(2024, 8, 31);
-
   @override
   void initState() {
     _myConfetti = ConfettiController();
@@ -57,18 +51,6 @@ class _MainScreenViewState extends State<MainScreenView> {
     await _fetchHabitData();
   }
 
-/*
-  Stream<List<Habit>> habitStream() {
-    final user = FirebaseAuth.instance.currentUser;
-    return FirebaseFirestore.instance
-        .collection('habits')
-        .where('userId', isEqualTo: user?.uid)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) => Habit.fromFirestore(doc)).toList();
-    });
-  }
-  */
   Stream<List<Habit>> habitStream() {
     final user = FirebaseAuth.instance.currentUser;
     return FirebaseFirestore.instance
@@ -292,7 +274,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                   onPageChanged: (focusedDay) {
                     _focusedDay = focusedDay;
                   },
-                  calendarStyle: CalendarStyle(
+                  calendarStyle: const CalendarStyle(
                     weekendTextStyle: TextStyle(color: Colors.blue),
                     defaultTextStyle: TextStyle(color: Colors.blue),
                     todayTextStyle: TextStyle(color: Colors.white),
@@ -306,7 +288,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  headerStyle: HeaderStyle(
+                  headerStyle: const HeaderStyle(
                     formatButtonVisible: false,
                     titleCentered: true,
                   ),
@@ -322,7 +304,7 @@ class _MainScreenViewState extends State<MainScreenView> {
                     color: Colors.blue,
                     text: 'All complete',
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Indicator(
                     color: Colors.white,
                     text: 'Some Complete',
@@ -728,8 +710,6 @@ class _IndicatorState extends State<Indicator> {
 Future<void> deleteUserAccount() async {
   try {
     await FirebaseAuth.instance.currentUser!.delete();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.clear();
   } on FirebaseAuthException catch (e) {
     print(e.code);
 
