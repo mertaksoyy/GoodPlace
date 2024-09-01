@@ -297,7 +297,6 @@ class _SignInViewState extends State<SignInView> {
       idToken: googleAuth.idToken,
     );
     userName = googleUser.displayName!;
-    print('username is $userName');
     context.read<UserNameProvider>().setUserName(userName);
     showOnboarding
         ? Navigator.of(context).pushNamed(onBoardViewRoute)

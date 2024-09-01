@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +8,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/habit.dart';
 import 'package:goodplace/services/ai_service.dart';
-import 'package:image_picker/image_picker.dart';
 
 class UpdateHabit extends StatefulWidget {
   const UpdateHabit({super.key});
