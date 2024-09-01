@@ -1,7 +1,11 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:goodplace/constants/routes.dart';
 import 'package:goodplace/models/habit.dart';
 import 'package:goodplace/services/ai_service.dart';
@@ -22,6 +26,9 @@ class _UpdateHabitState extends State<UpdateHabit> {
   bool purposeError = false;
   File? selectedImage;
   String imageUrl = '';
+  final User? currentUser = FirebaseAuth.instance.currentUser;
+
+  PlatformFile? pickedFile;
 
   @override
   void initState() {
@@ -39,24 +46,51 @@ class _UpdateHabitState extends State<UpdateHabit> {
     purposeController.text = habit.purpose;
   }
 
-  final CollectionReference habitsCollection =
-      FirebaseFirestore.instance.collection("habits");
+  Future<String> getImageUrl(String imagePath) async {
+    try {
+      final Reference ref = FirebaseStorage.instance.ref().child(imagePath);
+      String url = await ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      print("Error occurred while fetching image URL: $e");
+      return '';
+    }
+  }
 
-  Future<void> _pickImageFromGallery() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (image == null) return;
+  Future uploadFile() async {
+    if (pickedFile != null) {
+      final path = "${currentUser?.uid}/${pickedFile!.name}";
+      final file = File(pickedFile!.path!);
+      final ref = FirebaseStorage.instance.ref().child(path);
+      await ref.putFile(file);
+      imageUrl = await ref.getDownloadURL();
+    }
+  }
+
+  Future selectFile() async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result == null) return;
     setState(() {
-      selectedImage =
-          File(image.path); // Seçilen resim setState ile yenileniyor
+      pickedFile = result.files.first;
     });
   }
+
+  final CollectionReference habitsCollection =
+      FirebaseFirestore.instance.collection("habits");
 
   @override
   Widget build(BuildContext context) {
     habit = ModalRoute.of(context)!.settings.arguments as Habit;
     return Scaffold(
+        backgroundColor: Color(0xff8E97FD),
         appBar: AppBar(
-          title: const Text('Update the habit'),
+          centerTitle: true,
+          backgroundColor: Color(0xff8E97FD),
+          title: const Text(
+            'Update the habit',
+            style: TextStyle(
+                color: Color(0xffFFECCC), fontStyle: FontStyle.italic),
+          ),
         ),
         body: SingleChildScrollView(
           child: Column(children: [
@@ -66,10 +100,9 @@ class _UpdateHabitState extends State<UpdateHabit> {
                 height: 200.00,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: selectedImage != null
-                        ? FileImage(selectedImage!)
-                        : NetworkImage(habit.imagePath)
-                            as ImageProvider, // Geçerli bir placeholder resmi kullanın
+                    image: pickedFile != null
+                        ? FileImage(File(pickedFile!.path!))
+                        : NetworkImage(habit.imagePath) as ImageProvider,
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -81,6 +114,10 @@ class _UpdateHabitState extends State<UpdateHabit> {
                 maxLength: 25,
                 controller: titleController,
                 decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
+                  labelStyle: TextStyle(color: Colors.black),
+                  counterStyle: TextStyle(color: Colors.white),
                   suffixIcon: IconButton(
                     onPressed: () {
                       titleController.clear();
@@ -89,7 +126,7 @@ class _UpdateHabitState extends State<UpdateHabit> {
                     icon: const Icon(Icons.clear),
                   ),
                   labelText: 'Enter a Habit Title',
-                  hintText: 'Enter a habit title',
+                  hintText: 'Enter a Habit Title',
                   errorText: titleError && titleController.text.isEmpty
                       ? "Title Can't Be Empty"
                       : null,
@@ -114,12 +151,42 @@ class _UpdateHabitState extends State<UpdateHabit> {
                 maxLength: 200,
                 keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: purposeController.clear,
-                    icon: const Icon(Icons.clear),
+                  counterStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Colors.black),
+                  filled: true,
+                  fillColor: Colors.white,
+                  suffixIcon: Column(
+                    children: [
+                      IconButton(
+                        onPressed: () async {
+                          if (titleController.text.isNotEmpty) {
+                            try {
+                              String purpose =
+                                  await generatePurpose(titleController.text);
+                              setState(() {
+                                purposeController.text = purpose;
+                              });
+                            } catch (e) {
+                              print("Error generating AI purpose: $e");
+                            }
+                          } else {
+                            setState(() {
+                              titleError = true;
+                            });
+                          }
+                        },
+                        icon: SvgPicture.asset(
+                            width: 30, height: 30, 'assets/icon/magic.svg'),
+                      ),
+                      SizedBox(height: 15),
+                      IconButton(
+                        onPressed: purposeController.clear,
+                        icon: const Icon(Icons.clear),
+                      ),
+                    ],
                   ),
-                  hintText: 'Enter a habit purpose',
                   labelText: 'Enter a Habit Purpose',
+                  hintText: 'Enter a Habit Purpose',
                   errorText: purposeError && purposeController.text.isEmpty
                       ? "Purpose Can't Be Empty"
                       : null,
@@ -139,43 +206,21 @@ class _UpdateHabitState extends State<UpdateHabit> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
                 onPressed: () async {
-                  if (titleController.text.isNotEmpty) {
-                    try {
-                      // Yapay zeka ile purpose üretme kısmı
-                      String purpose =
-                          await generatePurpose(titleController.text);
-                      setState(() {
-                        purposeController.text = purpose;
-                      });
-                    } catch (e) {
-                      print("Error generating AI purpose: $e");
-                    }
-                  } else {
-                    setState(() {
-                      titleError = true;
-                    });
-                  }
+                  await selectFile();
                 },
-                child: const Center(child: Text('Create purpose with AI')),
+                child: const Center(
+                    child: Text(
+                  'Insert an image from gallery',
+                  style: TextStyle(color: Colors.black),
+                )),
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {
-                  _pickImageFromGallery();
-                },
-                child:
-                    const Center(child: Text('Insert an image from gallery')),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent,
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
                 onPressed: () async {
                   if (titleController.text.isEmpty) {
                     setState(() {});
@@ -185,15 +230,21 @@ class _UpdateHabitState extends State<UpdateHabit> {
                       purposeError = true;
                     });
                   } else {
-                    habitsCollection.doc(habit.id).update({
+                    await uploadFile();
+                    await habitsCollection.doc(habit.id).update({
                       'title': titleController.text,
                       'purpose': purposeController.text,
+                      'imagePath': imageUrl,
                     });
                     Navigator.of(context)
                         .pushReplacementNamed(myHabitsViewRoute);
                   }
                 },
-                child: const Center(child: Text('Update Habit')),
+                child: const Center(
+                    child: Text(
+                  'Update Habit',
+                  style: TextStyle(color: Colors.black),
+                )),
               ),
             ),
           ]),
