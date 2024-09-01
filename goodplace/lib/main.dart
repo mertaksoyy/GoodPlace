@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
           welcomePageRoute: (context) => const WelcomePage(),
           mainPageRoute: (context) => MainScreenView(),
           onBoardViewRoute: (context) => const OnBoardPage(),
-          habitPageViewRoute: (context) => HabitPageView(),
+          //habitPageViewRoute: (context) => HabitPageView(),
           chatBotViewRoute: (context) => ChatbotScreenView(),
         },
       ),
