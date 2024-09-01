@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const HomeScreen(),
+        home: const SplashScreen(),
         routes: {
           signInViewRoute: (context) => const SignInView(),
           signUpViewRoute: (context) => const SignUpPage(),
@@ -160,5 +160,36 @@ void requestNotificationPermissions() async {
     print('User granted provisional permission');
   } else {
     print('User declined or has not accepted permission');
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    _goHome();
+    super.initState();
+  }
+
+  _goHome() async {
+    await Future.delayed(Duration(seconds: 4));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => HomeScreen()));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xff94a9fe),
+      body: Center(
+        child: Image.asset('assets/images/splash1.png'),
+      ),
+    );
   }
 }
