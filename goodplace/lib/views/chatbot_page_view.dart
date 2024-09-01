@@ -181,42 +181,6 @@ class _ChatbotScreenViewState extends State<ChatbotScreenView> {
                 },
               ),
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text("deeme"),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text("deeme"),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text("deeme"),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text("deeme"),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 7,
-            ),
             TextField(
               focusNode: _focusNode, // FocusNode ekledik
               controller: _controller,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodplace/constants/routes.dart';
@@ -40,6 +41,23 @@ class _HabitPageViewState extends State<HabitPageView> {
     _controller = TextEditingController(text: streakCount.toString());
     super.initState();
     _loadTotalHabit(); // Uygulama başladığında totalHabit'i yükle
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        print('Message also contained a notification: ${message.notification}');
+      }
+    });
+
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        // Bildirimi göster veya işle
+        print('Notification Title: ${message.notification!.title}');
+        print('Notification Body: ${message.notification!.body}');
+      }
+    });
   }
 
   // Azure OpenAI API'sine title göndererek purpose oluşturma fonksiyonu

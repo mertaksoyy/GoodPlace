@@ -70,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     loadPrefs();
     saveTokenToDatabase();
+    requestNotificationPermissions();
   }
 
   // Veriyi yükledikten sonra UserNameProvider'ı güncelleyin
@@ -133,5 +134,27 @@ Future<void> saveTokenToDatabase() async {
     await FirebaseFirestore.instance.collection('users').doc(userId).set({
       'fcmToken': token,
     }, SetOptions(merge: true));
+  }
+}
+
+void requestNotificationPermissions() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    print('User granted permission');
+  } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    print('User granted provisional permission');
+  } else {
+    print('User declined or has not accepted permission');
   }
 }
