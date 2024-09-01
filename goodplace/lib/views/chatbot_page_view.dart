@@ -12,8 +12,20 @@ class _ChatbotScreenViewState extends State<ChatbotScreenView> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> _messages = [];
   final String openAiApiKey = '9070bb36762b4ddc8552f51b98091334';
-
+  final FocusNode _focusNode = FocusNode(); // FocusNode eklendi
   String selectedLanguage = 'en'; // Varsayılan olarak İngilizce
+  bool _isTextFieldFocused =
+      false; // TextField'ın focus durumunu izlemek için bir değişken
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        _isTextFieldFocused = _focusNode.hasFocus;
+      });
+    });
+  }
 
   // Sistem mesajını seçilen dile göre ayarlama
   String getSystemMessage() {
@@ -170,11 +182,14 @@ class _ChatbotScreenViewState extends State<ChatbotScreenView> {
               ),
             ),
             TextField(
+              focusNode: _focusNode, // FocusNode ekledik
               controller: _controller,
               decoration: InputDecoration(
-                  labelText: selectedLanguage == 'en'
-                      ? 'Your message'
-                      : 'Mesajınızı yazın',
+                  labelText: _isTextFieldFocused
+                      ? null
+                      : selectedLanguage == 'en'
+                          ? 'Your message'
+                          : 'Mesajınızı yazın', // TextField odaklandığında hint yazısını kaldır
                   focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                       borderSide: BorderSide(color: Colors.blue, width: 2)),
