@@ -4,6 +4,8 @@ const welcomePageRoute = '/welcome';
 const verifyEmailViewRoute = 'verify-email';
 const mainPageRoute = '/main-page';
 const onBoardViewRoute = '/onboard';
+const createHabitViewRoute = '/create-habitpage';
+const myHabitsViewRoute = '/my-habits';
+const updateHabitViewRoute = '/update-habitpage';
 const habitPageViewRoute = '/habitpage';
-
 const chatBotViewRoute = '/chatbot';
