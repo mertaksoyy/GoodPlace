@@ -1,2 +1,2 @@
-# GoodPlace Habit Tracking App
+# GoodPlace - AI Destekli Alışkanlık Takip Uygulaması
 GoodPlace App
