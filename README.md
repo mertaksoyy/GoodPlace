@@ -15,3 +15,7 @@ GoodPlace, kullanıcıların alışkanlıklarını takip etmelerine ve sürdürm
 - Firebase Firestore
 - Firebase Authentication
 - Azure AI: AI Destekli Özellikler
+
+## Contributors
+- celikerde - Erdem Çelik
+
