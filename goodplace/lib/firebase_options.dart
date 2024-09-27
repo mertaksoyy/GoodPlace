@@ -50,7 +50,7 @@ class DefaultFirebaseOptions {
   }
 
   static FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBU5MLqRiDIayv4gzI_KC4wYvi27GRbO_U',
+    //apiKey: 'AIzaSyBU5MLqRiDIayv4gzI_KC4wYvi27GRbO_U',
     appId: '1:881426385912:android:0387c52841151e2733240d',
     messagingSenderId: '881426385912',
     projectId: 'goodplace-firebase',
@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
   );
 
   static FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCzpijtUQZHE0wzCAi0uh9Z4pTbQuEeCaY',
+    //apiKey: 'AIzaSyCzpijtUQZHE0wzCAi0uh9Z4pTbQuEeCaY',
     appId: '1:881426385912:ios:fe7e33dfe37767ad33240d',
     messagingSenderId: '881426385912',
     projectId: 'goodplace-firebase',
